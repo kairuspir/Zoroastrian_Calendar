@@ -1,6 +1,58 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:location/location.dart';
+import 'dart:convert';
+
+import 'package:sunrise_sunset/sunrise_sunset.dart';
+
+SunriseSunsetData sunriseSunsetDataFromJson(String str) =>
+    SunriseSunsetData.fromJSON(json.decode(str));
+
+String sunriseSunsetDataToJson(SunriseSunsetData data) =>
+    json.encode(data.toMap());
+
+extension mySunriseSunsetData on SunriseSunsetData {
+  Map<String, dynamic> toMap() => {
+        "sunrise": this.sunrise,
+        "sunset": this.sunset,
+        "solar_noon": this.solarNoon,
+        "civil_twilight_begin": this.civilTwilightBegin,
+        "civil_twilight_end": this.civilTwilightEnd,
+        "nautical_twilight_begin": this.nauticalTwilightBegin,
+        "nautical_twilight_end": this.nauticalTwilightEnd,
+        "astronomical_twilight_begin": this.astronomicalTwilightBegin,
+        "astronomical_twilight_end": this.astronomicalTwilightEnd,
+        "day_length": this.dayLength,
+      };
+}
+
+LocationData locationDataFromJson(String str) =>
+    LocationData.fromMap(json.decode(str));
+
+String locationDataToJson(LocationData data) => json.encode(data.toMap());
+
+extension myLocation on LocationData {
+  Map<String, dynamic> toMap() => {
+        "latitude": this.latitude,
+        "longitude": this.longitude,
+        "accuracy": this.accuracy,
+        "altitude": this.altitude,
+        "speed": this.speed,
+        "speed_accuracy": this.speedAccuracy,
+        "heading": this.heading,
+        "time": this.time,
+      };
+}
+
+extension MyDuration on Duration {
+  String toTimeZoneString() {
+    var sign = (inMicroseconds < 0) ? "-" : "+";
+    var hours = this.inHours.abs().toString().padLeft(2, "0");
+    var minutes = this.inMinutes.remainder(60).abs().toString().padLeft(2, "0");
+    return sign + hours + ":" + minutes;
+  }
+}
 
 extension MyDateTime on DateTime {}
 

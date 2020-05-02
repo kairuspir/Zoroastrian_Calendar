@@ -3,9 +3,9 @@ import 'zorastrian_date.dart';
 
 class HomeTabViewModel {
   final ZorastrianDate zorastrianDate;
-  final String shahanshahiGah;
-  final String kadmiGah;
-  final String fasliGah;
+  final String shahanshahiGeh;
+  final String kadmiGeh;
+  final String fasliGeh;
   final String chog;
   final List<CalendarEvent> shahanshahiEvents;
   final List<CalendarEvent> kadmiEvents;
@@ -13,9 +13,9 @@ class HomeTabViewModel {
 
   const HomeTabViewModel({
     this.zorastrianDate,
-    this.shahanshahiGah,
-    this.kadmiGah,
-    this.fasliGah,
+    this.shahanshahiGeh,
+    this.kadmiGeh,
+    this.fasliGeh,
     this.chog,
     this.shahanshahiEvents,
     this.kadmiEvents,

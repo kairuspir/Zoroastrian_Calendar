@@ -9,12 +9,13 @@ class AppProvider extends InheritedWidget {
   final Function callSetState;
   final Widget child;
 
-  AppProvider(
-      {this.themeColor,
-      this.themeMode,
-      this.calendarType,
-      this.callSetState,
-      this.child});
+  AppProvider({
+    this.themeColor,
+    this.themeMode,
+    this.calendarType,
+    this.callSetState,
+    this.child,
+  });
 
   @override
   bool updateShouldNotify(AppProvider oldWidget) {

@@ -15,6 +15,8 @@ import 'models/event_editor_view_model.dart';
 import 'models/event_list_tab_view_model.dart';
 import 'models/home_tab_view_model.dart';
 import 'models/my_app_view_model.dart';
+import 'models/sunrise_sunset_location_cache.dart';
+import 'models/time_provider_result.dart';
 import 'models/user_preferences.dart';
 import 'models/zorastrian_date.dart';
 import 'time_provider.dart';
@@ -213,37 +215,36 @@ class DBProvider {
     return result;
   }
 
-  String _getGah(TimeProvider timeProvider, int dayId) {
-    final dateTime = timeProvider.dateTime;
-    final midnight = timeProvider.midnight.toDouble();
-    final sunrise = timeProvider.sunrise.toDouble();
-    final noon = timeProvider.noon.toDouble();
-    final afternoon = timeProvider.afternoon.toDouble();
-    final sunset = timeProvider.sunset.toDouble();
-    final time = TimeOfDay.fromDateTime(dateTime).toDouble();
+  String _getGeh(TimeProviderResult timeProviderResult, int dayId) {
     var result = "";
-    if (time >= midnight && time < sunrise) {
-      result = "Ushahin";
-    } else if (time >= sunrise && time < noon) {
-      result = "Havan";
-    } else if (time >= noon && time < afternoon) {
-      result = (dayId < 211) ? "Rapithwin" : "Second Havan";
-    } else if (time >= afternoon && time < sunset) {
-      result = "Uzirin";
-    } else {
-      result = "Aiwisruthrem";
+    switch (timeProviderResult.geh) {
+      case Geh.Ushahin:
+        result = "Ushahin";
+        break;
+      case Geh.Havan:
+        result = "Havan";
+        break;
+      case Geh.Rapithwan:
+        result = (dayId < 211) ? "Rapithwan" : "Second Havan";
+        break;
+      case Geh.Uzirin:
+        result = "Uzirin";
+        break;
+      case Geh.Aevishuthrem:
+        result = "Aiwisruthrem";
+        break;
     }
     return result;
   }
 
-  Future<String> _getChog(TimeProvider timeProvider) async {
+  Future<String> _getChog(TimeProviderResult timeProviderResult) async {
     // Good - Amrut, Shubh, Labh, Chal
     // Bad - Udveg, Rog, Kaal
     final db = await database;
-    final dateTime = timeProvider.dateTime;
+    final dateTime = timeProviderResult.dateTime;
     final day = DateFormat.EEEE().format(dateTime);
-    final dayPhase = timeProvider.dayPhase;
-    final chogNumber = timeProvider.chogNumber;
+    final dayPhase = timeProviderResult.dayPhase;
+    final chogNumber = timeProviderResult.chogNumber;
     String query = '''
       SELECT ChaughadiaName FROM ChaughadiaLookup
       JOIN Chaughadia on ChaughadiaLookup.ChaugNameId = Chaughadia.ChaughadiaNameId
@@ -274,10 +275,10 @@ class DBProvider {
 
   Future<HomeTabViewModel> getHomeTabData(DateTime now) async {
     final zdt = await getZorastrianDate(now);
-    final timeProvider = TimeProvider(now);
-    final sg = _getGah(timeProvider, zdt.shahanshahiDayId);
-    final kg = _getGah(timeProvider, zdt.kadmiDayId);
-    final fg = _getGah(timeProvider, zdt.fasliDayId);
+    final timeProvider = await TimeProvider.getResult(now);
+    final sg = _getGeh(timeProvider, zdt.shahanshahiDayId);
+    final kg = _getGeh(timeProvider, zdt.kadmiDayId);
+    final fg = _getGeh(timeProvider, zdt.fasliDayId);
     final ch = await _getChog(timeProvider);
     final se =
         await _getEventsForDay(calendar_key_shahenshai, zdt.shahanshahiDayId);
@@ -285,9 +286,9 @@ class DBProvider {
     final fe = await _getEventsForDay(calendar_key_fasli, zdt.fasliDayId);
     return HomeTabViewModel(
       zorastrianDate: zdt,
-      shahanshahiGah: sg,
-      kadmiGah: kg,
-      fasliGah: fg,
+      shahanshahiGeh: sg,
+      kadmiGeh: kg,
+      fasliGeh: fg,
       chog: ch,
       shahanshahiEvents: se,
       kadmiEvents: ke,
@@ -363,8 +364,12 @@ class DBProvider {
     final pct = int.parse(
         preferences.where((x) => x.name == _key_calendar_type).single.value);
     final calendarType = cts.where((x) => x.id == pct).single;
+
     return MyAppViewModel(
-        themeColor: color, themeMode: themeMode, calendarType: calendarType);
+      themeColor: color,
+      themeMode: themeMode,
+      calendarType: calendarType,
+    );
   }
 
   Future saveEventEditorEvent() async {
@@ -602,5 +607,29 @@ class DBProvider {
       eventTitle: eventTitle,
       editorTitle: editorTitle,
     );
+  }
+
+  Future<List<SunriseSunsetLocationCache>> getSunriseSunsetLocationCache(
+      DateTime dateTime) async {
+    final db = await database;
+    final date =
+        DateTime(dateTime.year, dateTime.month, dateTime.day).toIso8601String();
+    final query = await db.rawQuery('''
+      SELECT * FROM SunriseSunsetLocationCache 
+      where Date =?
+    ''', [date]);
+    final result = (query.isEmpty)
+        ? <SunriseSunsetLocationCache>[]
+        : query.map((x) => SunriseSunsetLocationCache.fromMap(x)).toList();
+    return result;
+  }
+
+  Future<void> setSunriseSunsetLocationCache(
+      SunriseSunsetLocationCache input) async {
+    final db = await database;
+    final dateTime = input.date;
+    final date = DateTime(dateTime.year, dateTime.month, dateTime.day);
+    final data = input.copyWith(date: date);
+    await db.insert("SunriseSunsetLocationCache", data.toMap());
   }
 }

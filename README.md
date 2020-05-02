@@ -1,4 +1,4 @@
-# zoroastriancalendar
+# Zoroastrian Calendar
 
 Zoroastrian Calendar
 

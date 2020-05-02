@@ -6,5 +6,9 @@ class MyAppViewModel {
   final ThemeMode themeMode;
   final CalendarType calendarType;
 
-  const MyAppViewModel({this.themeColor, this.themeMode, this.calendarType});
+  const MyAppViewModel({
+    @required this.themeColor,
+    @required this.themeMode,
+    @required this.calendarType,
+  });
 }
