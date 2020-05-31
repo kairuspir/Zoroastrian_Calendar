@@ -27,7 +27,6 @@ dependencies:
   equatable: any
   sunrise_sunset: any
   location: any
-  great_circle_distance: any
   tuple: any
   
   # The following adds the Cupertino Icons font to your application.

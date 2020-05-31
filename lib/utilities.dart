@@ -14,21 +14,23 @@ String sunriseSunsetDataToJson(SunriseSunsetData data) =>
 
 extension mySunriseSunsetData on SunriseSunsetData {
   Map<String, dynamic> toMap() => {
-        "sunrise": this.sunrise,
-        "sunset": this.sunset,
-        "solar_noon": this.solarNoon,
-        "civil_twilight_begin": this.civilTwilightBegin,
-        "civil_twilight_end": this.civilTwilightEnd,
-        "nautical_twilight_begin": this.nauticalTwilightBegin,
-        "nautical_twilight_end": this.nauticalTwilightEnd,
-        "astronomical_twilight_begin": this.astronomicalTwilightBegin,
-        "astronomical_twilight_end": this.astronomicalTwilightEnd,
+        "sunrise": this.sunrise.toIso8601String(),
+        "sunset": this.sunset.toIso8601String(),
+        "solar_noon": this.solarNoon.toIso8601String(),
+        "civil_twilight_begin": this.civilTwilightBegin.toIso8601String(),
+        "civil_twilight_end": this.civilTwilightEnd.toIso8601String(),
+        "nautical_twilight_begin": this.nauticalTwilightBegin.toIso8601String(),
+        "nautical_twilight_end": this.nauticalTwilightEnd.toIso8601String(),
+        "astronomical_twilight_begin":
+            this.astronomicalTwilightBegin.toIso8601String(),
+        "astronomical_twilight_end":
+            this.astronomicalTwilightEnd.toIso8601String(),
         "day_length": this.dayLength,
       };
 }
 
 LocationData locationDataFromJson(String str) =>
-    LocationData.fromMap(json.decode(str));
+    LocationData.fromMap(Map<String, double>.from(json.decode(str)));
 
 String locationDataToJson(LocationData data) => json.encode(data.toMap());
 

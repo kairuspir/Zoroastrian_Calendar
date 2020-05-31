@@ -1,11 +1,11 @@
 import 'dart:convert';
 
-import 'package:great_circle_distance/great_circle_distance.dart';
 import 'package:location/location.dart';
 import 'package:sunrise_sunset/sunrise_sunset.dart';
 import 'package:tuple/tuple.dart';
 
 import 'database.dart';
+import 'distance_provider.dart';
 import 'models/sunrise_sunset_location_cache.dart';
 import 'models/time_provider_result.dart';
 import 'utilities.dart';
