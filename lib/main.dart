@@ -61,7 +61,7 @@ class _MyAppPageState extends State<MyApp> {
               themeMode: data.themeMode,
               builder: (context, child) {
                 return CupertinoTheme(
-                  data: CupertinoThemeData(),
+                  data: MaterialBasedCupertinoThemeData(materialTheme: ThemeData(primarySwatch: data.themeColor)),
                   child: Material(child: child),
                 );
               },
