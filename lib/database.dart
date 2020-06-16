@@ -34,6 +34,14 @@ class DBProvider {
   static const calendar_key_shahenshai = "Shahanshahi";
   static const calendar_key_kadmi = "Kadmi";
   static const calendar_key_fasli = "Fasli";
+  static const gatha_days = [
+    "Ahunavad",
+    "Ushtavad",
+    "Spentomad",
+    "Vohukhshathra",
+    "Vahishtoisht",
+    "Avardad-sal-Gah"
+  ];
 
   Database _database;
   List<CalendarType> _calendarTypes;
@@ -82,8 +90,8 @@ class DBProvider {
     if (_fasliLeapYears != null) return _fasliLeapYears;
     final db = await database;
     final result = (await db.rawQuery(
-            "SELECT fasliyear FROM CalendarMasterLookup where faslidayid = 366"))
-        .map<int>((x) => x["fasliyear"])
+            "SELECT FasliYear FROM CalendarMasterLookup where faslidayid = 366"))
+        .map<int>((x) => x["FasliYear"])
         .toList();
     _fasliLeapYears = result;
     return _fasliLeapYears;
@@ -403,12 +411,7 @@ class DBProvider {
 
   void setEventEditorCalendarType(CalendarType calendarType) {
     final zd = _eventEditorModel.zorastrianDate;
-    final newCalendarDayLookupId =
-        (calendarType.name == calendar_key_shahenshai)
-            ? zd.shahanshahiDayId
-            : (calendarType.name == calendar_key_kadmi)
-                ? zd.kadmiDayId
-                : zd.fasliDayId;
+    final newCalendarDayLookupId = zd.getDayId(calendarType.name);
     final newCalendarTypeId = calendarType.id;
     final newCalendarEvent = _eventEditorModel.calendarEvent.copyWith(
         calendarDayLookupId: newCalendarDayLookupId,
@@ -422,39 +425,24 @@ class DBProvider {
         .where((x) => x.id == _eventEditorModel.calendarEvent.calendarTypeId)
         .single;
 
-    final oldMahName = (calendarType.name == calendar_key_shahenshai)
-        ? _eventEditorModel.zorastrianDate.shahanshahiMahName
-        : (calendarType.name == calendar_key_kadmi)
-            ? _eventEditorModel.zorastrianDate.kadmiMahName
-            : _eventEditorModel.zorastrianDate.fasliMahName;
+    final oldMahName =
+        _eventEditorModel.zorastrianDate.getMahName(calendarType.name);
     final newMahName = mahName;
-    String rojName;
-    if (oldMahName != "Gatha" && newMahName == "Gatha") {
-      rojName = "Ahunavad";
-    } else if (oldMahName == "Gatha" && newMahName != "Gatha") {
+    if (oldMahName == newMahName) return;
+
+    String rojName =
+        _eventEditorModel.zorastrianDate.getRojName(calendarType.name);
+
+    if (gatha_days.contains(rojName) && newMahName != "Asfandarmad") {
       rojName = "Hormazd";
-    } else {
-      rojName = (calendarType.name == calendar_key_shahenshai)
-          ? _eventEditorModel.zorastrianDate.shahanshahiRojName
-          : (calendarType.name == calendar_key_kadmi)
-              ? _eventEditorModel.zorastrianDate.kadmiRojName
-              : _eventEditorModel.zorastrianDate.fasliRojName;
     }
 
-    final year = (calendarType.name == calendar_key_shahenshai)
-        ? _eventEditorModel.zorastrianDate.shahanshahiYear
-        : (calendarType.name == calendar_key_kadmi)
-            ? _eventEditorModel.zorastrianDate.kadmiYear
-            : _eventEditorModel.zorastrianDate.fasliYear;
+    final year = _eventEditorModel.zorastrianDate.getYear(calendarType.name);
 
     final newZorastrianDate =
         await _getZorastrianDateRaw(calendarType, rojName, mahName, year);
     final newCalendarDayLookupId =
-        (calendarType.name == calendar_key_shahenshai)
-            ? newZorastrianDate.shahanshahiDayId
-            : (calendarType.name == calendar_key_kadmi)
-                ? newZorastrianDate.kadmiDayId
-                : newZorastrianDate.fasliDayId;
+        newZorastrianDate.getDayId(calendarType.name);
     final newCalendarMasterLookupId = newZorastrianDate.id;
     final newCalendarEvent = _eventEditorModel.calendarEvent.copyWith(
         calendarDayLookupId: newCalendarDayLookupId,
@@ -467,55 +455,41 @@ class DBProvider {
     final calendarType = (await calendarTypes)
         .where((x) => x.id == _eventEditorModel.calendarEvent.calendarTypeId)
         .single;
-    final mahName = (calendarType.name == calendar_key_shahenshai)
-        ? _eventEditorModel.zorastrianDate.shahanshahiMahName
-        : (calendarType.name == calendar_key_kadmi)
-            ? _eventEditorModel.zorastrianDate.kadmiMahName
-            : _eventEditorModel.zorastrianDate.fasliMahName;
-    final year = (calendarType.name == calendar_key_shahenshai)
-        ? _eventEditorModel.zorastrianDate.shahanshahiYear
-        : (calendarType.name == calendar_key_kadmi)
-            ? _eventEditorModel.zorastrianDate.kadmiYear
-            : _eventEditorModel.zorastrianDate.fasliYear;
+    final mahName =
+        _eventEditorModel.zorastrianDate.getMahName(calendarType.name);
+    final year = _eventEditorModel.zorastrianDate.getYear(calendarType.name);
 
     final newZorastrianDate =
         await _getZorastrianDateRaw(calendarType, rojName, mahName, year);
     final newCalendarDayLookupId =
-        (calendarType.name == calendar_key_shahenshai)
-            ? newZorastrianDate.shahanshahiDayId
-            : (calendarType.name == calendar_key_kadmi)
-                ? newZorastrianDate.kadmiDayId
-                : newZorastrianDate.fasliDayId;
+        newZorastrianDate.getDayId(calendarType.name);
     final newCalendarMasterLookupId = newZorastrianDate.id;
     final newCalendarEvent = _eventEditorModel.calendarEvent.copyWith(
         calendarDayLookupId: newCalendarDayLookupId,
         calendarMasterLookupId: newCalendarMasterLookupId);
+
+    var selectedFrequency = _eventEditorModel.selectedFrequency;
+    if (gatha_days.contains(rojName)) {
+      selectedFrequency = Frequency.Yearly;
+    }
     _eventEditorModel = _eventEditorModel.copyWith(
-        calendarEvent: newCalendarEvent, zorastrianDate: newZorastrianDate);
+        calendarEvent: newCalendarEvent,
+        zorastrianDate: newZorastrianDate,
+        selectedFrequency: selectedFrequency);
   }
 
   Future setEventEditorYear(int year) async {
     final calendarType = (await calendarTypes)
         .where((x) => x.id == _eventEditorModel.calendarEvent.calendarTypeId)
         .single;
-    final mahName = (calendarType.name == calendar_key_shahenshai)
-        ? _eventEditorModel.zorastrianDate.shahanshahiMahName
-        : (calendarType.name == calendar_key_kadmi)
-            ? _eventEditorModel.zorastrianDate.kadmiMahName
-            : _eventEditorModel.zorastrianDate.fasliMahName;
-    final rojName = (calendarType.name == calendar_key_shahenshai)
-        ? _eventEditorModel.zorastrianDate.shahanshahiRojName
-        : (calendarType.name == calendar_key_kadmi)
-            ? _eventEditorModel.zorastrianDate.kadmiRojName
-            : _eventEditorModel.zorastrianDate.fasliRojName;
+    final mahName =
+        _eventEditorModel.zorastrianDate.getMahName(calendarType.name);
+    final rojName =
+        _eventEditorModel.zorastrianDate.getRojName(calendarType.name);
     final newZorastrianDate =
         await _getZorastrianDateRaw(calendarType, rojName, mahName, year);
     final newCalendarDayLookupId =
-        (calendarType.name == calendar_key_shahenshai)
-            ? newZorastrianDate.shahanshahiDayId
-            : (calendarType.name == calendar_key_kadmi)
-                ? newZorastrianDate.kadmiDayId
-                : newZorastrianDate.fasliDayId;
+        newZorastrianDate.getDayId(calendarType.name);
     final newCalendarMasterLookupId = newZorastrianDate.id;
     final newCalendarEvent = _eventEditorModel.calendarEvent.copyWith(
         calendarDayLookupId: newCalendarDayLookupId,
@@ -531,17 +505,18 @@ class DBProvider {
         .single;
     final newZorastrianDate = await getZorastrianDate(input);
     final newCalendarDayLookupId =
-        (calendarType.name == calendar_key_shahenshai)
-            ? newZorastrianDate.shahanshahiDayId
-            : (calendarType.name == calendar_key_kadmi)
-                ? newZorastrianDate.kadmiDayId
-                : newZorastrianDate.fasliDayId;
+        newZorastrianDate.getDayId(calendarType.name);
     final newCalendarMasterLookupId = newZorastrianDate.id;
     final newCalendarEvent = _eventEditorModel.calendarEvent.copyWith(
         calendarDayLookupId: newCalendarDayLookupId,
         calendarMasterLookupId: newCalendarMasterLookupId);
     _eventEditorModel = _eventEditorModel.copyWith(
         calendarEvent: newCalendarEvent, zorastrianDate: newZorastrianDate);
+  }
+
+  void setEventEditorFrequency(Frequency frequency) {
+    _eventEditorModel =
+        _eventEditorModel.copyWith(selectedFrequency: frequency);
   }
 
   Future<EventEditorViewModel> getEventEditorData() async {
@@ -551,10 +526,7 @@ class DBProvider {
         : "Edit Event";
     final ZorastrianDate zorastrianDate = _eventEditorModel.zorastrianDate;
     final CalendarEvent calendarEvent = _eventEditorModel.calendarEvent;
-    final String selectedFrequency =
-        (_eventEditorModel.selectedFrequency == Frequency.Yearly)
-            ? "Yearly"
-            : "Monthly";
+    final selectedFrequency = _eventEditorModel.selectedFrequency;
 
     final eventTitle = calendarEvent.title;
     final cts = await calendarTypes;
@@ -562,21 +534,9 @@ class DBProvider {
         cts.where((x) => x.id == calendarEvent.calendarTypeId).single;
     final selectedCalendarTypeName = selectedCalendarType.name;
 
-    final selectedMah = (selectedCalendarTypeName == calendar_key_shahenshai)
-        ? zorastrianDate.shahanshahiMahName
-        : (selectedCalendarTypeName == calendar_key_kadmi)
-            ? zorastrianDate.kadmiMahName
-            : zorastrianDate.fasliMahName;
-    final selectedRoj = (selectedCalendarTypeName == calendar_key_shahenshai)
-        ? zorastrianDate.shahanshahiRojName
-        : (selectedCalendarTypeName == calendar_key_kadmi)
-            ? zorastrianDate.kadmiRojName
-            : zorastrianDate.fasliRojName;
-    final selectedYear = (selectedCalendarTypeName == calendar_key_shahenshai)
-        ? zorastrianDate.shahanshahiYear
-        : (selectedCalendarTypeName == calendar_key_kadmi)
-            ? zorastrianDate.kadmiYear
-            : zorastrianDate.fasliYear;
+    final selectedMah = zorastrianDate.getMahName(selectedCalendarTypeName);
+    final selectedRoj = zorastrianDate.getRojName(selectedCalendarTypeName);
+    final selectedYear = zorastrianDate.getYear(selectedCalendarTypeName);
 
     final selectedDate = zorastrianDate.gregorianDate;
 
@@ -591,7 +551,9 @@ class DBProvider {
       SELECT rojname FROM CalendarDayLookup 
       where id <=? and mahname = ?
     ''', [daysInYear, selectedMah])).map<String>((x) => x["RojName"]).toList();
-    final fc = ["Yearly", "Monthly"];
+    final fc = (gatha_days.contains(selectedRoj))
+        ? [Frequency.Yearly]
+        : [Frequency.Monthly, Frequency.Yearly];
     final mc = await mahCollection;
     return EventEditorViewModel(
       calendarTypes: cts,

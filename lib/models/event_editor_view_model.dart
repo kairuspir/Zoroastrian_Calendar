@@ -1,12 +1,13 @@
 import 'package:flutter/foundation.dart';
 
 import 'calendar_type.dart';
+import 'event_editor_model.dart';
 
 class EventEditorViewModel {
   final List<String> rojCollection;
   final List<String> mahCollection;
   final List<CalendarType> calendarTypes;
-  final List<String> frequencyCollection;
+  final List<Frequency> frequencyCollection;
 
   final String editorTitle;
   final String eventTitle;
@@ -14,7 +15,7 @@ class EventEditorViewModel {
   final String selectedRoj;
   final String selectedMah;
   final int selectedYear;
-  final String selectedFrequency;
+  final Frequency selectedFrequency;
   final DateTime selectedDate;
 
   const EventEditorViewModel({

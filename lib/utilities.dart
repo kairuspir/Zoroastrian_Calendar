@@ -6,6 +6,39 @@ import 'dart:convert';
 
 import 'package:sunrise_sunset/sunrise_sunset.dart';
 
+import 'database.dart';
+import 'models/event_editor_model.dart';
+import 'models/zorastrian_date.dart';
+
+extension myFrequency on Frequency {
+  String toShortString() => this.toString().split(".").last;
+}
+
+extension myZorastrianDate on ZorastrianDate {
+  T _calendarPicker<T>(String calendarName, T shahanshahiProperty,
+      T kadmiProperty, T fasliProperty) {
+    return (calendarName == DBProvider.calendar_key_shahenshai)
+        ? shahanshahiProperty
+        : (calendarName == DBProvider.calendar_key_kadmi)
+            ? kadmiProperty
+            : (calendarName == DBProvider.calendar_key_fasli)
+                ? fasliProperty
+                : null;
+  }
+
+  int getDayId(String calendarName) => this._calendarPicker(
+      calendarName, this.shahanshahiDayId, this.kadmiDayId, this.fasliDayId);
+
+  String getRojName(String calendarName) => this._calendarPicker(calendarName,
+      this.shahanshahiRojName, this.kadmiRojName, this.fasliRojName);
+
+  String getMahName(String calendarName) => this._calendarPicker(calendarName,
+      this.shahanshahiMahName, this.kadmiMahName, this.fasliMahName);
+
+  int getYear(String calendarName) => this._calendarPicker(
+      calendarName, this.shahanshahiYear, this.kadmiYear, this.fasliYear);
+}
+
 SunriseSunsetData sunriseSunsetDataFromJson(String str) =>
     SunriseSunsetData.fromJSON(json.decode(str));
 

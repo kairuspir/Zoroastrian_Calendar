@@ -10,6 +10,7 @@ import 'models/event_editor_model.dart';
 import 'models/event_editor_view_model.dart';
 import 'models/zorastrian_date.dart';
 import 'my_future_builder.dart';
+import 'utilities.dart';
 
 class EventEditor extends StatefulWidget {
   final EditorMode editorTitle;
@@ -191,6 +192,18 @@ class _EventEditorPageState extends State<EventEditor> {
                           pickedDate != data.selectedDate) {
                         await DBProvider.db.setEventEditorDate(pickedDate);
                       }
+                      setState(() {});
+                    },
+                  ),
+                  DropdownButtonFormField<Frequency>(
+                    decoration: InputDecoration(labelText: "Frequency"),
+                    value: data.selectedFrequency,
+                    items: data.frequencyCollection
+                        .map((x) => DropdownMenuItem(
+                            value: x, child: Text(x.toShortString())))
+                        .toList(),
+                    onChanged: (value) {
+                      DBProvider.db.setEventEditorFrequency(value);
                       setState(() {});
                     },
                   ),
