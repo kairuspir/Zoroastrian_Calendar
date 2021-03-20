@@ -7,35 +7,20 @@ import 'dart:convert';
 import 'package:sunrise_sunset/sunrise_sunset.dart';
 
 import 'database.dart';
-import 'models/event_editor_model.dart';
+import 'models/enum_models.dart';
 import 'models/zorastrian_date.dart';
 
-extension myFrequency on Frequency {
-  String toShortString() => this.toString().split(".").last;
-}
-
 extension myZorastrianDate on ZorastrianDate {
-  T _calendarPicker<T>(String calendarName, T shahanshahiProperty,
-      T kadmiProperty, T fasliProperty) {
-    return (calendarName == DBProvider.calendar_key_shahenshai)
-        ? shahanshahiProperty
-        : (calendarName == DBProvider.calendar_key_kadmi)
-            ? kadmiProperty
-            : (calendarName == DBProvider.calendar_key_fasli)
-                ? fasliProperty
-                : null;
-  }
-
-  int getDayId(String calendarName) => this._calendarPicker(
+  int getDayId(String calendarName) => calendarPicker(
       calendarName, this.shahanshahiDayId, this.kadmiDayId, this.fasliDayId);
 
-  String getRojName(String calendarName) => this._calendarPicker(calendarName,
+  String getRojName(String calendarName) => calendarPicker(calendarName,
       this.shahanshahiRojName, this.kadmiRojName, this.fasliRojName);
 
-  String getMahName(String calendarName) => this._calendarPicker(calendarName,
+  String getMahName(String calendarName) => calendarPicker(calendarName,
       this.shahanshahiMahName, this.kadmiMahName, this.fasliMahName);
 
-  int getYear(String calendarName) => this._calendarPicker(
+  int getYear(String calendarName) => calendarPicker(
       calendarName, this.shahanshahiYear, this.kadmiYear, this.fasliYear);
 }
 
@@ -162,6 +147,17 @@ extension myString on String {
         return Colors.grey;
     }
   }
+
+  DeviceCalendarState toDeviceCalendarState() {
+    switch (this) {
+      case "NotInitialized":
+        return DeviceCalendarState.NotInitialized;
+      case "Disabled":
+        return DeviceCalendarState.Disabled;
+      default:
+        return DeviceCalendarState.Initialized;
+    }
+  }
 }
 
 extension myMaterialColor on MaterialColor {
@@ -221,4 +217,15 @@ bool useWhiteForeground(Color color, {double bias: 1.0}) {
           pow(color.blue, 2) * 0.114)
       .round();
   return v < 130 * bias ? true : false;
+}
+
+T calendarPicker<T>(String calendarName, T shahanshahiProperty, T kadmiProperty,
+    T fasliProperty) {
+  return (calendarName == DBProvider.calendar_key_shahenshai)
+      ? shahanshahiProperty
+      : (calendarName == DBProvider.calendar_key_kadmi)
+          ? kadmiProperty
+          : (calendarName == DBProvider.calendar_key_fasli)
+              ? fasliProperty
+              : null;
 }
