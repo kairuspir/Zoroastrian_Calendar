@@ -7,26 +7,22 @@ class EventEditorModel {
   final EditorMode editorTitle;
   final ZorastrianDate zorastrianDate;
   final CalendarEvent calendarEvent;
-  final Frequency selectedFrequency;
 
   const EventEditorModel(
       {@required this.editorTitle,
       @required this.calendarEvent,
-      @required this.zorastrianDate,
-      @required this.selectedFrequency});
+      @required this.zorastrianDate});
 
   EventEditorModel copyWith(
           {EditorMode editorTitle,
           CalendarEvent calendarEvent,
           ZorastrianDate zorastrianDate,
-          Frequency selectedFrequency}) =>
+          bool useDeviceCalendar}) =>
       EventEditorModel(
         editorTitle: editorTitle ?? this.editorTitle,
         calendarEvent: calendarEvent ?? this.calendarEvent,
         zorastrianDate: zorastrianDate ?? this.zorastrianDate,
-        selectedFrequency: selectedFrequency ?? this.selectedFrequency,
       );
 }
 
 enum EditorMode { Add, Edit }
-enum Frequency { Yearly, Monthly }

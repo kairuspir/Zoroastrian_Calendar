@@ -44,6 +44,7 @@ class _MyAppPageState extends State<MyApp> {
             themeColor: data.themeColor,
             themeMode: data.themeMode,
             calendarType: data.calendarType,
+            deviceCalendarState: data.deviceCalendarState,
             callSetState: callSetState,
             child: MaterialApp(
               title: 'Flutter Demo',
@@ -61,7 +62,8 @@ class _MyAppPageState extends State<MyApp> {
               themeMode: data.themeMode,
               builder: (context, child) {
                 return CupertinoTheme(
-                  data: CupertinoThemeData(),
+                  data: MaterialBasedCupertinoThemeData(
+                      materialTheme: ThemeData(primarySwatch: data.themeColor)),
                   child: Material(child: child),
                 );
               },
@@ -174,12 +176,11 @@ class _MyHomePageState extends State<MyHomePage> {
     return CupertinoTabScaffold(
       tabBar: CupertinoTabBar(
         items: [
+          BottomNavigationBarItem(label: HomeTab.title, icon: HomeTab.iosIcon),
           BottomNavigationBarItem(
-              title: Text(HomeTab.title), icon: HomeTab.iosIcon),
+              label: EventsListTab.title, icon: EventsListTab.iosIcon),
           BottomNavigationBarItem(
-              title: Text(EventsListTab.title), icon: EventsListTab.iosIcon),
-          BottomNavigationBarItem(
-              title: Text(SettingsTab.title), icon: SettingsTab.iosIcon),
+              label: SettingsTab.title, icon: SettingsTab.iosIcon),
         ],
       ),
       tabBuilder: (context, index) {

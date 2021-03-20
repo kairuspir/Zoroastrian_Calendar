@@ -10,8 +10,7 @@ import 'package:sqflite/sqflite.dart';
 
 import 'models/calendar_event.dart';
 import 'models/calendar_type.dart';
-import 'models/event_editor_model.dart';
-import 'models/event_editor_view_model.dart';
+import 'models/enum_models.dart';
 import 'models/event_list_tab_view_model.dart';
 import 'models/home_tab_view_model.dart';
 import 'models/my_app_view_model.dart';
@@ -30,16 +29,24 @@ class DBProvider {
   static const _key_theme = "Theme";
   static const _key_theme_color = "ThemeColor";
   static const _key_calendar_type = "PreferredCalendarType";
+  static const _key_device_calendar_id = "DeviceCalendarId";
 
   static const calendar_key_shahenshai = "Shahanshahi";
   static const calendar_key_kadmi = "Kadmi";
   static const calendar_key_fasli = "Fasli";
+  static const gatha_days = [
+    "Ahunavad",
+    "Ushtavad",
+    "Spentomad",
+    "Vohukhshathra",
+    "Vahishtoisht",
+    "Avardad-sal-Gah"
+  ];
 
   Database _database;
   List<CalendarType> _calendarTypes;
   List<int> _fasliLeapYears;
   List<String> _mahCollection;
-  EventEditorModel _eventEditorModel;
 
   Future<Database> get database async {
     if (_database != null) return _database;
@@ -82,8 +89,8 @@ class DBProvider {
     if (_fasliLeapYears != null) return _fasliLeapYears;
     final db = await database;
     final result = (await db.rawQuery(
-            "SELECT fasliyear FROM CalendarMasterLookup where faslidayid = 366"))
-        .map<int>((x) => x["fasliyear"])
+            "SELECT FasliYear FROM CalendarMasterLookup where faslidayid = 366"))
+        .map<int>((x) => x["FasliYear"])
         .toList();
     _fasliLeapYears = result;
     return _fasliLeapYears;
@@ -138,7 +145,7 @@ class DBProvider {
     return result;
   }
 
-  Future<ZorastrianDate> _getZorastrianDateRaw(CalendarType calendarType,
+  Future<ZorastrianDate> getZorastrianDateRaw(CalendarType calendarType,
       String rojName, String mahName, int year) async {
     final db = await database;
     String query = '''
@@ -358,255 +365,41 @@ class DBProvider {
 
     final themeMode = (themeStr == "light")
         ? ThemeMode.light
-        : (themeStr == "dark") ? ThemeMode.dark : ThemeMode.system;
+        : (themeStr == "dark")
+            ? ThemeMode.dark
+            : ThemeMode.system;
 
     final cts = await calendarTypes;
     final pct = int.parse(
         preferences.where((x) => x.name == _key_calendar_type).single.value);
     final calendarType = cts.where((x) => x.id == pct).single;
-
+    final deviceCalendarState = preferences
+        .where((x) => x.name == _key_device_calendar_id)
+        .single
+        .value
+        .toDeviceCalendarState();
     return MyAppViewModel(
-      themeColor: color,
-      themeMode: themeMode,
-      calendarType: calendarType,
-    );
+        themeColor: color,
+        themeMode: themeMode,
+        calendarType: calendarType,
+        deviceCalendarState: deviceCalendarState);
   }
 
-  Future saveEventEditorEvent() async {
-    await saveEvent(_eventEditorModel.calendarEvent);
-  }
-
-  void clearEventEditorState() {
-    _eventEditorModel = null;
-  }
-
-  void setEventEditorState({
-    @required EditorMode editorTitle,
-    @required ZorastrianDate zorastrianDate,
-    @required CalendarEvent calendarEvent,
-    Frequency selectedFrequency = Frequency.Yearly,
-  }) {
-    _eventEditorModel = EventEditorModel(
-        editorTitle: editorTitle,
-        calendarEvent: calendarEvent,
-        zorastrianDate: zorastrianDate,
-        selectedFrequency: selectedFrequency);
-  }
-
-  void setEventEditorEventTitle(String title) {
-    final newCalendarEvent =
-        _eventEditorModel.calendarEvent.copyWith(title: title);
-
-    _eventEditorModel =
-        _eventEditorModel.copyWith(calendarEvent: newCalendarEvent);
-  }
-
-  void setEventEditorCalendarType(CalendarType calendarType) {
-    final zd = _eventEditorModel.zorastrianDate;
-    final newCalendarDayLookupId =
-        (calendarType.name == calendar_key_shahenshai)
-            ? zd.shahanshahiDayId
-            : (calendarType.name == calendar_key_kadmi)
-                ? zd.kadmiDayId
-                : zd.fasliDayId;
-    final newCalendarTypeId = calendarType.id;
-    final newCalendarEvent = _eventEditorModel.calendarEvent.copyWith(
-        calendarDayLookupId: newCalendarDayLookupId,
-        calendarTypeId: newCalendarTypeId);
-    _eventEditorModel =
-        _eventEditorModel.copyWith(calendarEvent: newCalendarEvent);
-  }
-
-  Future setEventEditorMah(String mahName) async {
-    final calendarType = (await calendarTypes)
-        .where((x) => x.id == _eventEditorModel.calendarEvent.calendarTypeId)
-        .single;
-
-    final oldMahName = (calendarType.name == calendar_key_shahenshai)
-        ? _eventEditorModel.zorastrianDate.shahanshahiMahName
-        : (calendarType.name == calendar_key_kadmi)
-            ? _eventEditorModel.zorastrianDate.kadmiMahName
-            : _eventEditorModel.zorastrianDate.fasliMahName;
-    final newMahName = mahName;
-    String rojName;
-    if (oldMahName != "Gatha" && newMahName == "Gatha") {
-      rojName = "Ahunavad";
-    } else if (oldMahName == "Gatha" && newMahName != "Gatha") {
-      rojName = "Hormazd";
-    } else {
-      rojName = (calendarType.name == calendar_key_shahenshai)
-          ? _eventEditorModel.zorastrianDate.shahanshahiRojName
-          : (calendarType.name == calendar_key_kadmi)
-              ? _eventEditorModel.zorastrianDate.kadmiRojName
-              : _eventEditorModel.zorastrianDate.fasliRojName;
-    }
-
-    final year = (calendarType.name == calendar_key_shahenshai)
-        ? _eventEditorModel.zorastrianDate.shahanshahiYear
-        : (calendarType.name == calendar_key_kadmi)
-            ? _eventEditorModel.zorastrianDate.kadmiYear
-            : _eventEditorModel.zorastrianDate.fasliYear;
-
-    final newZorastrianDate =
-        await _getZorastrianDateRaw(calendarType, rojName, mahName, year);
-    final newCalendarDayLookupId =
-        (calendarType.name == calendar_key_shahenshai)
-            ? newZorastrianDate.shahanshahiDayId
-            : (calendarType.name == calendar_key_kadmi)
-                ? newZorastrianDate.kadmiDayId
-                : newZorastrianDate.fasliDayId;
-    final newCalendarMasterLookupId = newZorastrianDate.id;
-    final newCalendarEvent = _eventEditorModel.calendarEvent.copyWith(
-        calendarDayLookupId: newCalendarDayLookupId,
-        calendarMasterLookupId: newCalendarMasterLookupId);
-    _eventEditorModel = _eventEditorModel.copyWith(
-        calendarEvent: newCalendarEvent, zorastrianDate: newZorastrianDate);
-  }
-
-  Future setEventEditorRoj(String rojName) async {
-    final calendarType = (await calendarTypes)
-        .where((x) => x.id == _eventEditorModel.calendarEvent.calendarTypeId)
-        .single;
-    final mahName = (calendarType.name == calendar_key_shahenshai)
-        ? _eventEditorModel.zorastrianDate.shahanshahiMahName
-        : (calendarType.name == calendar_key_kadmi)
-            ? _eventEditorModel.zorastrianDate.kadmiMahName
-            : _eventEditorModel.zorastrianDate.fasliMahName;
-    final year = (calendarType.name == calendar_key_shahenshai)
-        ? _eventEditorModel.zorastrianDate.shahanshahiYear
-        : (calendarType.name == calendar_key_kadmi)
-            ? _eventEditorModel.zorastrianDate.kadmiYear
-            : _eventEditorModel.zorastrianDate.fasliYear;
-
-    final newZorastrianDate =
-        await _getZorastrianDateRaw(calendarType, rojName, mahName, year);
-    final newCalendarDayLookupId =
-        (calendarType.name == calendar_key_shahenshai)
-            ? newZorastrianDate.shahanshahiDayId
-            : (calendarType.name == calendar_key_kadmi)
-                ? newZorastrianDate.kadmiDayId
-                : newZorastrianDate.fasliDayId;
-    final newCalendarMasterLookupId = newZorastrianDate.id;
-    final newCalendarEvent = _eventEditorModel.calendarEvent.copyWith(
-        calendarDayLookupId: newCalendarDayLookupId,
-        calendarMasterLookupId: newCalendarMasterLookupId);
-    _eventEditorModel = _eventEditorModel.copyWith(
-        calendarEvent: newCalendarEvent, zorastrianDate: newZorastrianDate);
-  }
-
-  Future setEventEditorYear(int year) async {
-    final calendarType = (await calendarTypes)
-        .where((x) => x.id == _eventEditorModel.calendarEvent.calendarTypeId)
-        .single;
-    final mahName = (calendarType.name == calendar_key_shahenshai)
-        ? _eventEditorModel.zorastrianDate.shahanshahiMahName
-        : (calendarType.name == calendar_key_kadmi)
-            ? _eventEditorModel.zorastrianDate.kadmiMahName
-            : _eventEditorModel.zorastrianDate.fasliMahName;
-    final rojName = (calendarType.name == calendar_key_shahenshai)
-        ? _eventEditorModel.zorastrianDate.shahanshahiRojName
-        : (calendarType.name == calendar_key_kadmi)
-            ? _eventEditorModel.zorastrianDate.kadmiRojName
-            : _eventEditorModel.zorastrianDate.fasliRojName;
-    final newZorastrianDate =
-        await _getZorastrianDateRaw(calendarType, rojName, mahName, year);
-    final newCalendarDayLookupId =
-        (calendarType.name == calendar_key_shahenshai)
-            ? newZorastrianDate.shahanshahiDayId
-            : (calendarType.name == calendar_key_kadmi)
-                ? newZorastrianDate.kadmiDayId
-                : newZorastrianDate.fasliDayId;
-    final newCalendarMasterLookupId = newZorastrianDate.id;
-    final newCalendarEvent = _eventEditorModel.calendarEvent.copyWith(
-        calendarDayLookupId: newCalendarDayLookupId,
-        calendarMasterLookupId: newCalendarMasterLookupId);
-    _eventEditorModel = _eventEditorModel.copyWith(
-        calendarEvent: newCalendarEvent, zorastrianDate: newZorastrianDate);
-  }
-
-  Future setEventEditorDate(DateTime date) async {
-    final input = DateTime(date.year, date.month, date.day, 7);
-    final calendarType = (await calendarTypes)
-        .where((x) => x.id == _eventEditorModel.calendarEvent.calendarTypeId)
-        .single;
-    final newZorastrianDate = await getZorastrianDate(input);
-    final newCalendarDayLookupId =
-        (calendarType.name == calendar_key_shahenshai)
-            ? newZorastrianDate.shahanshahiDayId
-            : (calendarType.name == calendar_key_kadmi)
-                ? newZorastrianDate.kadmiDayId
-                : newZorastrianDate.fasliDayId;
-    final newCalendarMasterLookupId = newZorastrianDate.id;
-    final newCalendarEvent = _eventEditorModel.calendarEvent.copyWith(
-        calendarDayLookupId: newCalendarDayLookupId,
-        calendarMasterLookupId: newCalendarMasterLookupId);
-    _eventEditorModel = _eventEditorModel.copyWith(
-        calendarEvent: newCalendarEvent, zorastrianDate: newZorastrianDate);
-  }
-
-  Future<EventEditorViewModel> getEventEditorData() async {
+  Future<List<String>> getRojNamesForCalendarMah(
+      String mahName, String calendarName, int year) async {
     final db = await database;
-    final String editorTitle = (_eventEditorModel.editorTitle == EditorMode.Add)
-        ? "Add Event"
-        : "Edit Event";
-    final ZorastrianDate zorastrianDate = _eventEditorModel.zorastrianDate;
-    final CalendarEvent calendarEvent = _eventEditorModel.calendarEvent;
-    final String selectedFrequency =
-        (_eventEditorModel.selectedFrequency == Frequency.Yearly)
-            ? "Yearly"
-            : "Monthly";
-
-    final eventTitle = calendarEvent.title;
-    final cts = await calendarTypes;
-    final selectedCalendarType =
-        cts.where((x) => x.id == calendarEvent.calendarTypeId).single;
-    final selectedCalendarTypeName = selectedCalendarType.name;
-
-    final selectedMah = (selectedCalendarTypeName == calendar_key_shahenshai)
-        ? zorastrianDate.shahanshahiMahName
-        : (selectedCalendarTypeName == calendar_key_kadmi)
-            ? zorastrianDate.kadmiMahName
-            : zorastrianDate.fasliMahName;
-    final selectedRoj = (selectedCalendarTypeName == calendar_key_shahenshai)
-        ? zorastrianDate.shahanshahiRojName
-        : (selectedCalendarTypeName == calendar_key_kadmi)
-            ? zorastrianDate.kadmiRojName
-            : zorastrianDate.fasliRojName;
-    final selectedYear = (selectedCalendarTypeName == calendar_key_shahenshai)
-        ? zorastrianDate.shahanshahiYear
-        : (selectedCalendarTypeName == calendar_key_kadmi)
-            ? zorastrianDate.kadmiYear
-            : zorastrianDate.fasliYear;
-
-    final selectedDate = zorastrianDate.gregorianDate;
-
     int daysInYear = 365;
-    if (selectedCalendarTypeName == calendar_key_fasli) {
+    if (calendarName == calendar_key_fasli) {
       final fly = await fasliLeapYears;
-      if (fly.contains(selectedYear)) {
+      if (fly.contains(year)) {
         daysInYear = 366;
       }
     }
     final rc = (await db.rawQuery('''
       SELECT rojname FROM CalendarDayLookup 
       where id <=? and mahname = ?
-    ''', [daysInYear, selectedMah])).map<String>((x) => x["RojName"]).toList();
-    final fc = ["Yearly", "Monthly"];
-    final mc = await mahCollection;
-    return EventEditorViewModel(
-      calendarTypes: cts,
-      frequencyCollection: fc,
-      mahCollection: mc,
-      rojCollection: rc,
-      selectedFrequency: selectedFrequency,
-      selectedMah: selectedMah,
-      selectedRoj: selectedRoj,
-      selectedYear: selectedYear,
-      selectedCalendarType: selectedCalendarType,
-      selectedDate: selectedDate,
-      eventTitle: eventTitle,
-      editorTitle: editorTitle,
-    );
+    ''', [daysInYear, mahName])).map<String>((x) => x["RojName"]).toList();
+    return rc;
   }
 
   Future<List<SunriseSunsetLocationCache>> getSunriseSunsetLocationCache(
@@ -631,5 +424,28 @@ class DBProvider {
     final date = DateTime(dateTime.year, dateTime.month, dateTime.day);
     final data = input.copyWith(date: date);
     await db.insert("SunriseSunsetLocationCache", data.toMap());
+  }
+
+  Future<int> setDeviceCalendarId(String deviceCalendarId) async {
+    return await _setUserPreference(_key_device_calendar_id, deviceCalendarId);
+  }
+
+  Future<DeviceCalendarState> getDeviceCalendarState() async {
+    final preferences = await _getUserPreferences();
+    final result = preferences
+        .where((x) => x.name == _key_device_calendar_id)
+        .single
+        .value
+        .toDeviceCalendarState();
+    return result;
+  }
+
+  Future<String> getDeviceCalendarId() async {
+    final preferences = await _getUserPreferences();
+    final result = preferences
+        .where((x) => x.name == _key_device_calendar_id)
+        .single
+        .value;
+    return result;
   }
 }

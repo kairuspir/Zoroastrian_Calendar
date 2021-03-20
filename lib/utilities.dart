@@ -6,6 +6,24 @@ import 'dart:convert';
 
 import 'package:sunrise_sunset/sunrise_sunset.dart';
 
+import 'database.dart';
+import 'models/enum_models.dart';
+import 'models/zorastrian_date.dart';
+
+extension myZorastrianDate on ZorastrianDate {
+  int getDayId(String calendarName) => calendarPicker(
+      calendarName, this.shahanshahiDayId, this.kadmiDayId, this.fasliDayId);
+
+  String getRojName(String calendarName) => calendarPicker(calendarName,
+      this.shahanshahiRojName, this.kadmiRojName, this.fasliRojName);
+
+  String getMahName(String calendarName) => calendarPicker(calendarName,
+      this.shahanshahiMahName, this.kadmiMahName, this.fasliMahName);
+
+  int getYear(String calendarName) => calendarPicker(
+      calendarName, this.shahanshahiYear, this.kadmiYear, this.fasliYear);
+}
+
 SunriseSunsetData sunriseSunsetDataFromJson(String str) =>
     SunriseSunsetData.fromJSON(json.decode(str));
 
@@ -129,6 +147,17 @@ extension myString on String {
         return Colors.grey;
     }
   }
+
+  DeviceCalendarState toDeviceCalendarState() {
+    switch (this) {
+      case "NotInitialized":
+        return DeviceCalendarState.NotInitialized;
+      case "Disabled":
+        return DeviceCalendarState.Disabled;
+      default:
+        return DeviceCalendarState.Initialized;
+    }
+  }
 }
 
 extension myMaterialColor on MaterialColor {
@@ -188,4 +217,15 @@ bool useWhiteForeground(Color color, {double bias: 1.0}) {
           pow(color.blue, 2) * 0.114)
       .round();
   return v < 130 * bias ? true : false;
+}
+
+T calendarPicker<T>(String calendarName, T shahanshahiProperty, T kadmiProperty,
+    T fasliProperty) {
+  return (calendarName == DBProvider.calendar_key_shahenshai)
+      ? shahanshahiProperty
+      : (calendarName == DBProvider.calendar_key_kadmi)
+          ? kadmiProperty
+          : (calendarName == DBProvider.calendar_key_fasli)
+              ? fasliProperty
+              : null;
 }

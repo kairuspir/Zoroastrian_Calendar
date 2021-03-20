@@ -1,11 +1,15 @@
+import 'package:app_settings/app_settings.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 
-import 'database.dart';
+import 'app_provider.dart';
+import 'device_calendar_provider.dart';
+import 'event_editor_logic.dart';
 import 'models/calendar_event.dart';
 import 'models/calendar_type.dart';
+import 'models/enum_models.dart';
 import 'models/event_editor_model.dart';
 import 'models/event_editor_view_model.dart';
 import 'models/zorastrian_date.dart';
@@ -24,6 +28,7 @@ class EventEditor extends StatefulWidget {
 
 class _EventEditorPageState extends State<EventEditor> {
   final _formKey = GlobalKey<FormState>();
+  final _logic = EventEditorLogic();
 
   showYearPicker(data) {
     showDialog(
@@ -61,7 +66,7 @@ class _EventEditorPageState extends State<EventEditor> {
                   if (_selectedYearIndex != _initialIndex) {
                     final numListMap = numList.asMap();
                     final _selectedYear = numListMap[_selectedYearIndex];
-                    await DBProvider.db.setEventEditorYear(_selectedYear);
+                    await _logic.setEventEditorYear(_selectedYear);
                   }
                   Navigator.of(context).pop();
                   setState(() {});
@@ -73,10 +78,36 @@ class _EventEditorPageState extends State<EventEditor> {
     );
   }
 
+  Future showCalendarPermissionsRequiredDialog() {
+    return showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Calendar Permissions"),
+            content: SingleChildScrollView(
+                child: ListBody(
+              children: [
+                Text(
+                    "App does not have calendar permissions granted to save to device calendar."),
+                Text("Please grant permissions to continue."),
+              ],
+            )),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    AppSettings.openAppSettings();
+                  },
+                  child: Text("Go to settings"))
+            ],
+          );
+        });
+  }
+
   @override
   void initState() {
     super.initState();
-    DBProvider.db.setEventEditorState(
+    _logic.setEventEditorState(
         editorTitle: widget.editorTitle,
         calendarEvent: widget.calendarEvent,
         zorastrianDate: widget.zorastrianDate);
@@ -85,13 +116,15 @@ class _EventEditorPageState extends State<EventEditor> {
   @override
   void dispose() {
     super.dispose();
-    DBProvider.db.clearEventEditorState();
+    _logic.clearEventEditorState();
   }
 
   @override
   Widget build(BuildContext context) {
+    final deviceCalendarState = AppProvider.of(context).deviceCalendarState;
+
     return MyFutureBuilder<EventEditorViewModel>(
-      future: DBProvider.db.getEventEditorData(),
+      future: _logic.getEventEditorData(),
       builder: (context, data) {
         return Scaffold(
           appBar: AppBar(
@@ -101,7 +134,7 @@ class _EventEditorPageState extends State<EventEditor> {
                 IconButton(
                   icon: Icon(Icons.delete),
                   onPressed: () async {
-                    await DBProvider.db.deleteEvent(widget.calendarEvent);
+                    await _logic.deleteEvent(widget.calendarEvent);
                     Navigator.pop(context);
                   },
                 ),
@@ -125,7 +158,7 @@ class _EventEditorPageState extends State<EventEditor> {
                       }
                     },
                     onSaved: (value) {
-                      DBProvider.db.setEventEditorEventTitle(value);
+                      _logic.setEventEditorEventTitle(value);
                       setState(() {});
                     },
                   ),
@@ -138,7 +171,7 @@ class _EventEditorPageState extends State<EventEditor> {
                             DropdownMenuItem(value: x, child: Text(x.name)))
                         .toList(),
                     onChanged: (value) {
-                      DBProvider.db.setEventEditorCalendarType(value);
+                      _logic.setEventEditorCalendarType(value);
                       setState(() {});
                     },
                     isExpanded: true,
@@ -150,7 +183,7 @@ class _EventEditorPageState extends State<EventEditor> {
                         .map((x) => DropdownMenuItem(value: x, child: Text(x)))
                         .toList(),
                     onChanged: (value) async {
-                      await DBProvider.db.setEventEditorRoj(value);
+                      await _logic.setEventEditorRoj(value);
                       setState(() {});
                     },
                   ),
@@ -161,7 +194,7 @@ class _EventEditorPageState extends State<EventEditor> {
                         .map((x) => DropdownMenuItem(value: x, child: Text(x)))
                         .toList(),
                     onChanged: (value) async {
-                      await DBProvider.db.setEventEditorMah(value);
+                      await _logic.setEventEditorMah(value);
                       setState(() {});
                     },
                   ),
@@ -189,7 +222,7 @@ class _EventEditorPageState extends State<EventEditor> {
 
                       if (pickedDate != null &&
                           pickedDate != data.selectedDate) {
-                        await DBProvider.db.setEventEditorDate(pickedDate);
+                        await _logic.setEventEditorDate(pickedDate);
                       }
                       setState(() {});
                     },
@@ -200,7 +233,23 @@ class _EventEditorPageState extends State<EventEditor> {
                       if (_formKey.currentState.validate()) {
                         _formKey.currentState.save();
 
-                        await DBProvider.db.saveEventEditorEvent();
+                        if (deviceCalendarState ==
+                            DeviceCalendarState.Disabled) {
+                          await _logic.saveEventEditorEvent();
+                        } else {
+                          if (await DeviceCalendarProvider
+                              .isPermissionsGranted()) {
+                            if (deviceCalendarState ==
+                                DeviceCalendarState.NotInitialized) {
+                              await _logic.initializeDeviceCalendar();
+                              AppProvider.of(context).callSetState();
+                            }
+                            await _logic.saveEventToDeviceCalendar();
+                            await _logic.saveEventEditorEvent();
+                          } else {
+                            await showCalendarPermissionsRequiredDialog();
+                          }
+                        }
                         Navigator.pop(context);
                       }
                     },

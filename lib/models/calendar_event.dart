@@ -16,6 +16,7 @@ class CalendarEvent {
   final int calendarTypeId;
   final String title;
   final String description;
+  final String deviceCalendarEventId;
   final int isDeleted;
 
   const CalendarEvent({
@@ -25,6 +26,7 @@ class CalendarEvent {
     this.calendarTypeId,
     this.title,
     this.description,
+    this.deviceCalendarEventId,
     this.isDeleted,
   });
 
@@ -35,6 +37,7 @@ class CalendarEvent {
     int calendarTypeId,
     String title,
     String description,
+    String deviceCalendarEventId,
     int isDeleted,
   }) {
     return CalendarEvent(
@@ -45,6 +48,8 @@ class CalendarEvent {
         calendarTypeId: calendarTypeId ?? this.calendarTypeId,
         title: title ?? this.title,
         description: description ?? this.description,
+        deviceCalendarEventId:
+            deviceCalendarEventId ?? this.deviceCalendarEventId,
         isDeleted: isDeleted ?? this.isDeleted);
   }
 
@@ -55,6 +60,7 @@ class CalendarEvent {
         calendarTypeId: json["CalendarTypeId"],
         title: json["Title"],
         description: json["Description"],
+        deviceCalendarEventId: json["DeviceCalendarEventId"],
         isDeleted: json["IsDeleted"],
       );
 
@@ -65,6 +71,7 @@ class CalendarEvent {
         "CalendarTypeId": calendarTypeId,
         "Title": title,
         "Description": description,
+        "DeviceCalendarEventId": deviceCalendarEventId,
         "IsDeleted": isDeleted,
       };
 }
