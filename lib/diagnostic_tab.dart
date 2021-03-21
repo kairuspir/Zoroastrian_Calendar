@@ -47,14 +47,19 @@ class _DiagnosticTabState extends State<DiagnosticTab> {
 
       final table = _DiagnosticTable(
           tableName: tableName, tableData: tableData, showData: false);
-
+      if (this.mounted) {
+        setState(() {
+          data.add(table);
+        });
+      } else {
+        return;
+      }
+    }
+    if (this.mounted) {
       setState(() {
-        data.add(table);
+        isLoading = false;
       });
     }
-    setState(() {
-      isLoading = false;
-    });
   }
 
   Widget _buildTab() {
