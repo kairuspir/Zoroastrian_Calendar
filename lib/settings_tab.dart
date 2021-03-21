@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'app_provider.dart';
 import 'database.dart';
+import 'diagnostic_tab.dart';
 import 'models/calendar_type.dart';
 import 'my_future_builder.dart';
 import 'utilities.dart';
@@ -199,6 +200,16 @@ class _SettingsTabState extends State<SettingsTab> {
                 },
               ),
             ),
+            ListTile(
+                title: Text("Diagnostics"),
+                trailing: RaisedButton(
+                    child: Text("Open"),
+                    onPressed: () async {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => DiagnosticTab()));
+                    })),
             ListTile(
               title: Text('Remind me to rate this app'),
               trailing: Switch.adaptive(

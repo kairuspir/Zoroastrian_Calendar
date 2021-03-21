@@ -58,7 +58,6 @@ class EventEditorLogic {
     @required EditorMode editorTitle,
     @required ZorastrianDate zorastrianDate,
     @required CalendarEvent calendarEvent,
-    @required bool useDeviceCalendar,
   }) {
     _eventEditorModel = EventEditorModel(
         editorTitle: editorTitle,
