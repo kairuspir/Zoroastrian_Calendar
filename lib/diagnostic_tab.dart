@@ -69,7 +69,7 @@ class _DiagnosticTabState extends State<DiagnosticTab> {
         ),
         body: Padding(
             padding: EdgeInsets.all(10.0),
-            child: ListView.builder(
+            child: ListView.separated(
               itemCount: itemCount,
               itemBuilder: (context, index) => ListView(
                 shrinkWrap: true,
@@ -93,19 +93,31 @@ class _DiagnosticTabState extends State<DiagnosticTab> {
                                   setState(() => data[index].showData = value)),
                         ),
                         if (data[index].showData)
-                          ListView.builder(
-                              shrinkWrap: true,
-                              physics: ClampingScrollPhysics(),
-                              itemCount: data[index].tableData.length,
-                              itemBuilder: (context, tableIndex) => Row(
-                                    children: [
-                                      ...data[index].tableData[tableIndex].map(
-                                          (td) => Expanded(
-                                              flex: 1, child: Text(td)))
-                                    ],
-                                  )),
+                          Container(
+                              constraints: BoxConstraints(
+                                  maxHeight:
+                                      MediaQuery.of(context).size.height / 3),
+                              child: ListView.separated(
+                                  shrinkWrap: true,
+                                  physics: ClampingScrollPhysics(),
+                                  itemCount: data[index].tableData.length,
+                                  itemBuilder: (context, tableIndex) => Row(
+                                        children: [
+                                          ...data[index]
+                                              .tableData[tableIndex]
+                                              .map((td) => Expanded(
+                                                  flex: 1, child: Text(td)))
+                                        ],
+                                      ),
+                                  separatorBuilder: (context, tableIndex) =>
+                                      Divider(
+                                        color: Colors.black,
+                                      ))),
                         Padding(padding: EdgeInsets.only(top: 10)),
                       ],
+              ),
+              separatorBuilder: (context, index) => Divider(
+                color: Theme.of(context).primaryColor,
               ),
             )));
   }
