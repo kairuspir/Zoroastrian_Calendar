@@ -448,4 +448,80 @@ class DBProvider {
         .value;
     return result;
   }
+
+  Future<List<ZorastrianDate>> getMonthTabData(DateTime selectedDate,
+      String calendarType, MonthTabCalendarMode mode) async {
+    final db = await database;
+    List<Map<String, dynamic>> queryResult;
+    if (mode == MonthTabCalendarMode.Zoroastrian) {
+      final today = selectedDate.toString().substring(0, 10) + " 00:00:00.000";
+      final shahanshahiJoinClause = '''
+      join CalendarDayLookup 'BaseCDL' on BaseCML.shahanshahidayid = BaseCDL.Id
+      join CalendarDayLookup 'RangeCDL' on RangeCDL.MahName = BaseCDL.MahName AND RangeCDL.Id != 366
+      join CalendarMasterLookup CML on CML.shahanshahidayid = RangeCDL.Id AND BaseCML.ShahanshahiYear = CML.ShahanshahiYear
+      ''';
+      final kadmiJoinClause = '''
+      join CalendarDayLookup 'BaseCDL' on BaseCML.kadmidayid = BaseCDL.Id
+      join CalendarDayLookup 'RangeCDL' on RangeCDL.MahName = BaseCDL.MahName AND RangeCDL.Id != 366
+      join CalendarMasterLookup CML on CML.kadmidayid = RangeCDL.Id AND BaseCML.KadmiYear = CML.KadmiYear
+      ''';
+      final fasliJoinClause = '''
+      join CalendarDayLookup 'BaseCDL' on BaseCML.faslidayid = BaseCDL.Id
+      join CalendarDayLookup 'RangeCDL' on RangeCDL.MahName = BaseCDL.MahName
+      join CalendarMasterLookup CML on CML.faslidayid = RangeCDL.Id AND BaseCML.FasliYear = CML.FasliYear
+      ''';
+      final joinClause = calendarPicker(calendarType, shahanshahiJoinClause,
+          kadmiJoinClause, fasliJoinClause);
+      final query = '''
+      SELECT CML.id,
+      CML.GregorianDate,
+      CML.Shahanshahidayid,
+      SCDL.RojName AS 'ShahanshahiRojName',
+      SCDL.MahName AS 'ShahanshahiMahName',
+      CML.ShahanshahiYear,
+      CML.KadmiDayId,
+      KCDL.RojName AS 'KadmiRojName',
+      KCDL.MahName AS 'KadmiMahName',
+      CML.KadmiYear,
+      CML.faslidayid,
+      FCDL.RojName AS 'FasliRojName',
+      FCDL.MahName AS 'FasliMahName',
+      CML.FasliYear
+      FROM CalendarMasterLookup 'BaseCML' 
+      $joinClause
+      join CalendarDayLookup 'SCDL' on CML.shahanshahidayid = SCDL.Id
+      join CalendarDayLookup 'KCDL' on CML.kadmidayid = KCDL.Id
+      join CalendarDayLookup 'FCDL' on CML.faslidayid = FCDL.Id
+      where BaseCML.gregoriandate = ?
+      ''';
+      queryResult = await db.rawQuery(query, [today]);
+    } else if (mode == MonthTabCalendarMode.Gregorian) {
+      final fromDate = DateTime(selectedDate.year, selectedDate.month, 1);
+      final toDate = DateTime(selectedDate.year, selectedDate.month + 1, 0);
+      String query = '''
+      SELECT CML.id,
+      CML.GregorianDate,
+      CML.Shahanshahidayid,
+      SCDL.RojName AS 'ShahanshahiRojName',
+      SCDL.MahName AS 'ShahanshahiMahName',
+      CML.ShahanshahiYear,
+      CML.KadmiDayId,
+      KCDL.RojName AS 'KadmiRojName',
+      KCDL.MahName AS 'KadmiMahName',
+      CML.KadmiYear,
+      CML.faslidayid,
+      FCDL.RojName AS 'FasliRojName',
+      FCDL.MahName AS 'FasliMahName',
+      CML.FasliYear
+      FROM CalendarMasterLookup 'CML'
+      join CalendarDayLookup 'SCDL' on CML.shahanshahidayid = SCDL.Id
+      join CalendarDayLookup 'KCDL' on CML.kadmidayid = KCDL.Id
+      join CalendarDayLookup 'FCDL' on CML.faslidayid = FCDL.Id
+      where CML.gregoriandate >= ? AND CML.gregoriandate <= ?
+      ''';
+      queryResult = await db.rawQuery(query, [fromDate, toDate]);
+    }
+    final result = queryResult.map((e) => ZorastrianDate.fromMap(e)).toList();
+    return result;
+  }
 }

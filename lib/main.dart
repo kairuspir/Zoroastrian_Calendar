@@ -6,6 +6,7 @@ import 'database.dart';
 import 'events_list_tab.dart';
 import 'home_tab.dart';
 import 'models/my_app_view_model.dart';
+import 'month_tab.dart';
 import 'my_future_builder.dart';
 import 'settings_tab.dart';
 import 'widgets.dart';
@@ -103,6 +104,10 @@ class _MyHomePageState extends State<MyHomePage> {
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
       switch (tabname) {
+        case Tabname.Month:
+          _activeTabTitle = MonthTab.title;
+          _activeTabWidget = MonthTab();
+          break;
         case Tabname.Events:
           _activeTabTitle = EventsListTab.title;
           _activeTabWidget = EventsListTab();
@@ -145,6 +150,14 @@ class _MyHomePageState extends State<MyHomePage> {
               },
             ),
             ListTile(
+              leading: MonthTab.androidIcon,
+              title: Text(MonthTab.title),
+              onTap: () {
+                Navigator.pop(context);
+                _setTab(Tabname.Month);
+              },
+            ),
+            ListTile(
               leading: EventsListTab.androidIcon,
               title: Text(EventsListTab.title),
               onTap: () {
@@ -177,6 +190,8 @@ class _MyHomePageState extends State<MyHomePage> {
       tabBar: CupertinoTabBar(
         items: [
           BottomNavigationBarItem(label: HomeTab.title, icon: HomeTab.iosIcon),
+          BottomNavigationBarItem(
+              label: MonthTab.title, icon: MonthTab.iosIcon),
           BottomNavigationBarItem(
               label: EventsListTab.title, icon: EventsListTab.iosIcon),
           BottomNavigationBarItem(
@@ -217,4 +232,4 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-enum Tabname { Home, Events, Settings }
+enum Tabname { Home, Month, Events, Settings }

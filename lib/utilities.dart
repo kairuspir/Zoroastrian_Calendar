@@ -74,7 +74,13 @@ extension MyDuration on Duration {
   }
 }
 
-extension MyDateTime on DateTime {}
+extension MyDateTime on DateTime {
+  bool isSameDate(DateTime otherDate) {
+    return this.year == otherDate.year &&
+        this.month == otherDate.month &&
+        this.day == otherDate.day;
+  }
+}
 
 extension MyTimeOfDay on TimeOfDay {
   double toDouble() {
@@ -203,6 +209,19 @@ extension myMaterialColor on MaterialColor {
     } else {
       return "grey";
     }
+  }
+}
+
+extension myList<T> on List<T> {
+  List<List<T>> chunk(int batchSize) {
+    var len = this.length;
+    var chunks = List<List<T>>();
+
+    for (var i = 0; i < len; i += batchSize) {
+      var end = (i + batchSize < len) ? i + batchSize : len;
+      chunks.add(this.sublist(i, end));
+    }
+    return chunks;
   }
 }
 
