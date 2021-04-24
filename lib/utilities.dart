@@ -215,7 +215,7 @@ extension myMaterialColor on MaterialColor {
 extension myList<T> on List<T> {
   List<List<T>> chunk(int batchSize) {
     var len = this.length;
-    var chunks = List<List<T>>();
+    var chunks = List<List<T>>.empty(growable: true);
 
     for (var i = 0; i < len; i += batchSize) {
       var end = (i + batchSize < len) ? i + batchSize : len;

@@ -20,7 +20,7 @@ class MonthTabLogic {
   Future<MonthTabViewModel> getMonthTabData() async {
     final rawList =
         await DBProvider.db.getMonthTabData(selectedDate, calendarType, mode);
-    final tableData = List<List<DayInMonthTabViewModel>>();
+    final tableData = List<List<DayInMonthTabViewModel>>.empty(growable: true);
     tableData.add(_getTableHeader());
     tableData.addAll(_getTableBody(rawList));
     return MonthTabViewModel(tableData: tableData);
@@ -43,7 +43,7 @@ class MonthTabLogic {
     final dateTime = DateTime.now();
     final calendarName = "";
     final todaysDate = DateTime(dateTime.year, dateTime.month, dateTime.day);
-    final paddedRaw = List<DayInMonthTabViewModel>();
+    final paddedRaw = List<DayInMonthTabViewModel>.empty(growable: true);
     paddedRaw.addAll(_getPrefixedEmptyCells(rawList.first.gregorianDate));
     paddedRaw.addAll(rawList
         .map((date) =>
