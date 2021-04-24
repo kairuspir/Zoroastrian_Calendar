@@ -202,7 +202,7 @@ class _SettingsTabState extends State<SettingsTab> {
             ),
             ListTile(
                 title: Text("Diagnostics"),
-                trailing: RaisedButton(
+                trailing: ElevatedButton(
                     child: Text("Open"),
                     onPressed: () async {
                       Navigator.push(

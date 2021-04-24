@@ -291,9 +291,7 @@ class _HomeTabState extends State<HomeTab> with TickerProviderStateMixin {
                         ][_tabController.index],
                       ),
                       Divider(color: Theme.of(context).dividerColor),
-                      RaisedButton(
-                        padding: const EdgeInsets.all(8.0),
-                        textTheme: Theme.of(context).buttonTheme.textTheme,
+                      ElevatedButton(
                         onPressed: () {
                           final calendarTypeId = _tabController.index + 1;
                           final calendarDayLookupId = (calendarTypeId == 1)

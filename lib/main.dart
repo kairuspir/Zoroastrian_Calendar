@@ -56,7 +56,9 @@ class _MyAppPageState extends State<MyApp> {
                 primarySwatch: data.themeColor,
                 toggleableActiveColor: data.themeColor[200],
                 accentColor: data.themeColor[200],
-                textSelectionHandleColor: data.themeColor[400],
+                textSelectionTheme: TextSelectionThemeData(
+                  selectionHandleColor: data.themeColor[400],
+                ),
                 buttonColor: data.themeColor[600],
               ),
               themeMode: data.themeMode,

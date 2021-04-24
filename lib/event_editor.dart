@@ -56,12 +56,12 @@ class _EventEditorPageState extends State<EventEditor> {
                 .toList(),
           ),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
                 child: Text("CANCEL")),
-            FlatButton(
+            TextButton(
                 onPressed: () async {
                   if (_selectedYearIndex != _initialIndex) {
                     final numListMap = numList.asMap();
@@ -227,7 +227,7 @@ class _EventEditorPageState extends State<EventEditor> {
                       setState(() {});
                     },
                   ),
-                  RaisedButton(
+                  ElevatedButton(
                     child: Text("Save"),
                     onPressed: () async {
                       if (_formKey.currentState.validate()) {
@@ -254,7 +254,7 @@ class _EventEditorPageState extends State<EventEditor> {
                       }
                     },
                   ),
-                  RaisedButton(
+                  ElevatedButton(
                       child: Text("Cancel"),
                       onPressed: () {
                         Navigator.pop(context);

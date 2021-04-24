@@ -11,7 +11,7 @@ class DiagnosticTab extends StatefulWidget {
 }
 
 class _DiagnosticTabState extends State<DiagnosticTab> {
-  final data = List<_DiagnosticTable>();
+  final data = List<_DiagnosticTable>.empty(growable: true);
   var isLoading = true;
 
   int get itemCount => isLoading ? data.length + 1 : data.length;
@@ -37,7 +37,7 @@ class _DiagnosticTabState extends State<DiagnosticTab> {
           tableSchemaQuery.map((e) => e["name"].toString()).toList();
 
       final tableDataQuery = await database.query(tableName);
-      final tableData = List<List<String>>();
+      final tableData = List<List<String>>.empty(growable: true);
       tableData.add(columnNamesForTable);
       tableDataQuery
           .map((e) =>
