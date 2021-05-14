@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:zoroastriancalendar/app_provider.dart';
 
 typedef MySyncWidgetBuilder<T> = Widget Function(
     BuildContext context, T snapshot);
@@ -23,7 +24,8 @@ class MyFutureBuilder<T> extends StatelessWidget {
             default:
               return Center(
                   child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.blue)));
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                          AppProvider.of(context).themeColor)));
           }
         });
   }

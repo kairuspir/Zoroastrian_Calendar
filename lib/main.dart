@@ -97,7 +97,9 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   String _activeTabTitle = HomeTab.title;
-  Widget _activeTabWidget = HomeTab();
+  Widget _activeTabWidget = HomeTab(
+    selectedDate: DateTime.now(),
+  );
   void _setTab(Tabname tabname) {
     setState(() {
       // This call to setState tells the Flutter framework that something has
@@ -121,7 +123,9 @@ class _MyHomePageState extends State<MyHomePage> {
         case Tabname.Home:
         default:
           _activeTabTitle = HomeTab.title;
-          _activeTabWidget = HomeTab();
+          _activeTabWidget = HomeTab(
+            selectedDate: DateTime.now(),
+          );
       }
     });
   }
@@ -132,55 +136,58 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(_activeTabTitle),
       ),
       drawer: Drawer(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            DrawerHeader(
-              decoration: BoxDecoration(color: Theme.of(context).primaryColor),
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 20),
-                child: Icon(Icons.perm_identity,
-                    color: Theme.of(context).secondaryHeaderColor, size: 96),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              DrawerHeader(
+                decoration:
+                    BoxDecoration(color: Theme.of(context).primaryColor),
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 20),
+                  child: Icon(Icons.perm_identity,
+                      color: Theme.of(context).secondaryHeaderColor, size: 96),
+                ),
               ),
-            ),
-            ListTile(
-              leading: HomeTab.androidIcon,
-              title: Text(HomeTab.title),
-              onTap: () {
-                Navigator.pop(context);
-                _setTab(Tabname.Home);
-              },
-            ),
-            ListTile(
-              leading: MonthTab.androidIcon,
-              title: Text(MonthTab.title),
-              onTap: () {
-                Navigator.pop(context);
-                _setTab(Tabname.Month);
-              },
-            ),
-            ListTile(
-              leading: EventsListTab.androidIcon,
-              title: Text(EventsListTab.title),
-              onTap: () {
-                Navigator.pop(context);
-                _setTab(Tabname.Events);
-              },
-            ),
-            // Long drawer contents are often segmented.
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Divider(),
-            ),
-            ListTile(
-              leading: SettingsTab.androidIcon,
-              title: Text(SettingsTab.title),
-              onTap: () {
-                Navigator.pop(context);
-                _setTab(Tabname.Settings);
-              },
-            )
-          ],
+              ListTile(
+                leading: HomeTab.androidIcon,
+                title: Text(HomeTab.title),
+                onTap: () {
+                  Navigator.pop(context);
+                  _setTab(Tabname.Home);
+                },
+              ),
+              ListTile(
+                leading: MonthTab.androidIcon,
+                title: Text(MonthTab.title),
+                onTap: () {
+                  Navigator.pop(context);
+                  _setTab(Tabname.Month);
+                },
+              ),
+              ListTile(
+                leading: EventsListTab.androidIcon,
+                title: Text(EventsListTab.title),
+                onTap: () {
+                  Navigator.pop(context);
+                  _setTab(Tabname.Events);
+                },
+              ),
+              // Long drawer contents are often segmented.
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Divider(),
+              ),
+              ListTile(
+                leading: SettingsTab.androidIcon,
+                title: Text(SettingsTab.title),
+                onTap: () {
+                  Navigator.pop(context);
+                  _setTab(Tabname.Settings);
+                },
+              )
+            ],
+          ),
         ),
       ),
       body: _activeTabWidget,
@@ -205,14 +212,19 @@ class _MyHomePageState extends State<MyHomePage> {
           case 0:
             return CupertinoTabView(
               defaultTitle: HomeTab.title,
-              builder: (context) => HomeTab(),
+              builder: (context) => HomeTab(
+                selectedDate: DateTime.now(),
+              ),
             );
           case 1:
+            return CupertinoTabView(
+                defaultTitle: MonthTab.title, builder: (context) => MonthTab());
+          case 2:
             return CupertinoTabView(
               defaultTitle: EventsListTab.title,
               builder: (context) => EventsListTab(),
             );
-          case 2:
+          case 3:
             return CupertinoTabView(
               defaultTitle: SettingsTab.title,
               builder: (context) => SettingsTab(),

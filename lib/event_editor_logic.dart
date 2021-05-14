@@ -158,7 +158,7 @@ class EventEditorLogic {
   }
 
   Future setEventEditorDate(DateTime date) async {
-    final input = DateTime(date.year, date.month, date.day, 7);
+    final input = DateTime(date.year, date.month, date.day);
     final calendarType = (await DBProvider.db.calendarTypes)
         .where((x) => x.id == _eventEditorModel.calendarEvent.calendarTypeId)
         .single;

@@ -16,13 +16,15 @@ class HomeTab extends StatefulWidget {
   static const title = 'Home';
   static const androidIcon = Icon(Icons.home);
   static const iosIcon = Icon(CupertinoIcons.home);
+  final DateTime selectedDate;
+  HomeTab({@required this.selectedDate});
 
   @override
   _HomeTabState createState() => _HomeTabState();
 }
 
 class _HomeTabState extends State<HomeTab> with TickerProviderStateMixin {
-  DateTime _selectedDate = DateTime.now();
+  DateTime _selectedDate;
   TabController _tabController;
   CalendarType calendarType;
 
@@ -331,6 +333,7 @@ class _HomeTabState extends State<HomeTab> with TickerProviderStateMixin {
   void initState() {
     _tabController = new TabController(vsync: this, length: 3);
     _tabController.addListener(_handleTabSelection);
+    _selectedDate = widget.selectedDate;
     super.initState();
   }
 

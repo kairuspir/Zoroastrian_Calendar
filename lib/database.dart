@@ -186,15 +186,7 @@ class DBProvider {
 
   Future<ZorastrianDate> getZorastrianDate(DateTime now) async {
     final db = await database;
-    DateTime inputDate;
-    if (now.hour < 6) {
-      // Zorastrian day starts at 6 am.
-      inputDate = DateTime(now.year, now.month, now.day - 1, now.hour,
-          now.minute, now.second, now.millisecond, now.microsecond);
-    } else {
-      inputDate = now;
-    }
-    final today = inputDate.toString().substring(0, 10) + " 00:00:00.000";
+    final today = now.toString().substring(0, 10) + " 00:00:00.000";
     String query = '''
       SELECT CML.id,
       CML.GregorianDate,
@@ -281,7 +273,15 @@ class DBProvider {
   }
 
   Future<HomeTabViewModel> getHomeTabData(DateTime now) async {
-    final zdt = await getZorastrianDate(now);
+    DateTime inputDate;
+    if (now.hour < 6) {
+      // Zorastrian day starts at 6 am.
+      inputDate = DateTime(now.year, now.month, now.day - 1, now.hour,
+          now.minute, now.second, now.millisecond, now.microsecond);
+    } else {
+      inputDate = now;
+    }
+    final zdt = await getZorastrianDate(inputDate);
     final timeProvider = await TimeProvider.getResult(now);
     final sg = _getGeh(timeProvider, zdt.shahanshahiDayId);
     final kg = _getGeh(timeProvider, zdt.kadmiDayId);
@@ -449,8 +449,10 @@ class DBProvider {
     return result;
   }
 
-  Future<List<ZorastrianDate>> getMonthTabData(DateTime selectedDate,
-      String calendarType, MonthTabCalendarMode mode) async {
+  Future<List<MapEntry<ZorastrianDate, List<CalendarEvent>>>> getMonthTabData(
+      DateTime selectedDate,
+      String calendarType,
+      MonthTabCalendarMode mode) async {
     final db = await database;
     List<Map<String, dynamic>> queryResult;
     if (mode == MonthTabCalendarMode.Zoroastrian) {
@@ -521,7 +523,20 @@ class DBProvider {
       ''';
       queryResult = await db.rawQuery(query, [fromDate, toDate]);
     }
-    final result = queryResult.map((e) => ZorastrianDate.fromMap(e)).toList();
+    final zorastrianDateList =
+        queryResult.map((e) => ZorastrianDate.fromMap(e)).toList();
+
+    final result = List<MapEntry<ZorastrianDate, List<CalendarEvent>>>.empty(
+        growable: true);
+
+    await Future.forEach(zorastrianDateList, (e) async {
+      final eventList = await _getEventsForDay(
+          calendarType,
+          calendarPicker(
+              calendarType, e.shahanshahiDayId, e.kadmiDayId, e.fasliDayId));
+      result.add(MapEntry(e, eventList));
+    });
+
     return result;
   }
 }
