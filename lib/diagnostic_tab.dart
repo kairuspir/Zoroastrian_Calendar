@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'database.dart';
 import 'widgets.dart';
 
@@ -151,5 +150,8 @@ class _DiagnosticTable {
   final List<List<String>> tableData;
   bool showData;
 
-  _DiagnosticTable({this.tableName, this.tableData, this.showData});
+  _DiagnosticTable(
+      {required this.tableName,
+      required this.tableData,
+      required this.showData});
 }

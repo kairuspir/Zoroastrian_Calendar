@@ -256,26 +256,24 @@ extension myList<T> on List<T> {
   }
 }
 
-bool useWhiteForeground(Color color, {double bias: 1.0}) {
-  // Old:
-  // return 1.05 / (color.computeLuminance() + 0.05) > 4.5;
-
-  // New:
-  bias ??= 1.0;
-  int v = sqrt(pow(color.red, 2) * 0.299 +
-          pow(color.green, 2) * 0.587 +
-          pow(color.blue, 2) * 0.114)
+bool useWhiteForeground(Color color, {double bias = 1.0}) {
+  int v = sqrt(pow(color.r, 2) * 0.299 +
+          pow(color.g, 2) * 0.587 +
+          pow(color.b, 2) * 0.114)
       .round();
   return v < 130 * bias ? true : false;
 }
 
 T calendarPicker<T>(String calendarName, T shahanshahiProperty, T kadmiProperty,
     T fasliProperty) {
+  assert(calendarName == DBProvider.calendar_key_shahenshai ||
+      calendarName == DBProvider.calendar_key_kadmi ||
+      calendarName == DBProvider.calendar_key_fasli);
   return (calendarName == DBProvider.calendar_key_shahenshai)
       ? shahanshahiProperty
       : (calendarName == DBProvider.calendar_key_kadmi)
           ? kadmiProperty
           : (calendarName == DBProvider.calendar_key_fasli)
               ? fasliProperty
-              : null;
+              : throw Error();
 }

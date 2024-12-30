@@ -16,15 +16,15 @@ class EventListTabViewModel {
   final String title;
 
   EventListTabViewModel({
-    this.id,
-    this.gregorianDate,
-    this.title,
+    required this.id,
+    required this.gregorianDate,
+    required this.title,
   });
 
   EventListTabViewModel copyWith({
-    int id,
-    DateTime gregorianDate,
-    String title,
+    int? id,
+    DateTime? gregorianDate,
+    String? title,
   }) =>
       EventListTabViewModel(
         id: id ?? this.id,

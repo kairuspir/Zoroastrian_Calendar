@@ -5,12 +5,13 @@ class MonthTabProvider extends InheritedWidget {
   final MonthTabCalendarMode mode;
   final Widget child;
 
-  MonthTabProvider({this.mode, this.child});
+  MonthTabProvider({required this.mode, required this.child})
+      : super(child: child);
   @override
   bool updateShouldNotify(MonthTabProvider oldWidget) {
     return true;
   }
 
-  static MonthTabProvider of(BuildContext context) =>
+  static MonthTabProvider? of(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<MonthTabProvider>();
 }

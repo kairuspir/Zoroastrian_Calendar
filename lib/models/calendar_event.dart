@@ -20,25 +20,25 @@ class CalendarEvent {
   final int isDeleted;
 
   const CalendarEvent({
-    this.id,
-    this.calendarMasterLookupId,
-    this.calendarDayLookupId,
-    this.calendarTypeId,
-    this.title,
-    this.description,
-    this.deviceCalendarEventId,
-    this.isDeleted,
+    required this.id,
+    required this.calendarMasterLookupId,
+    required this.calendarDayLookupId,
+    required this.calendarTypeId,
+    required this.title,
+    required this.description,
+    required this.deviceCalendarEventId,
+    required this.isDeleted,
   });
 
   CalendarEvent copyWith({
-    int id,
-    int calendarMasterLookupId,
-    int calendarDayLookupId,
-    int calendarTypeId,
-    String title,
-    String description,
-    String deviceCalendarEventId,
-    int isDeleted,
+    int? id,
+    int? calendarMasterLookupId,
+    int? calendarDayLookupId,
+    int? calendarTypeId,
+    String? title,
+    String? description,
+    String? deviceCalendarEventId,
+    int? isDeleted,
   }) {
     return CalendarEvent(
         id: id ?? this.id,

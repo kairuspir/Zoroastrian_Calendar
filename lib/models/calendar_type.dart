@@ -16,8 +16,8 @@ class CalendarType extends Equatable {
   final String name;
 
   const CalendarType({
-    this.id,
-    this.name,
+    required this.id,
+    required this.name,
   });
 
   factory CalendarType.fromMap(Map<String, dynamic> json) => CalendarType(

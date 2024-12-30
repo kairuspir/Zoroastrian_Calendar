@@ -12,10 +12,11 @@ description: Zoroastrian Calendar
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 version: 1.0.0+1
+publish_to: none # Remove this line if you wish to publish to pub.dev
 
 environment:
   #sdk: ">=2.1.0 <3.0.0"
-  sdk: ">=2.6.0 <3.0.0"
+  sdk: ^3.6.0
 
 dependencies:
   flutter:
@@ -25,7 +26,8 @@ dependencies:
   path_provider: any
   intl: any
   equatable: any
-  sunrise_sunset: any
+  sunrise_sunset: 
+    git: https://github.com/kairuspir/sunrise-sunset
   location: any
   tuple: any
   device_calendar: any

@@ -1,6 +1,7 @@
 import 'package:device_calendar/device_calendar.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 import 'package:zoroastriancalendar/models/enum_models.dart';
 
 import 'database.dart';
@@ -13,41 +14,44 @@ import 'models/zorastrian_date.dart';
 import 'utilities.dart';
 
 class EventEditorLogic {
-  EventEditorModel _eventEditorModel;
+  EventEditorModel? _eventEditorModel;
 
   Future saveEventToDeviceCalendar() async {
     if ((await DBProvider.db.getDeviceCalendarState()) ==
         DeviceCalendarState.Initialized) {
       final deviceCalendarId = await DBProvider.db.getDeviceCalendarId();
-      var eventId = _eventEditorModel.calendarEvent.deviceCalendarEventId;
+      String? eventId = _eventEditorModel!.calendarEvent.deviceCalendarEventId;
       if (!(await DeviceCalendarProvider.isEventPresentInCalendar(
           deviceCalendarId, eventId))) {
         eventId = null;
       }
+      var localLocation = tz.local;
       final event = Event(deviceCalendarId,
           eventId: eventId,
-          title: _eventEditorModel.calendarEvent.title,
-          description: _eventEditorModel.calendarEvent.description,
-          start: _eventEditorModel.zorastrianDate.gregorianDate,
-          end: _eventEditorModel.zorastrianDate.gregorianDate,
+          title: _eventEditorModel!.calendarEvent.title,
+          description: _eventEditorModel!.calendarEvent.description,
+          start: tz.TZDateTime.from(
+              _eventEditorModel!.zorastrianDate.gregorianDate, localLocation),
+          end: tz.TZDateTime.from(
+              _eventEditorModel!.zorastrianDate.gregorianDate, localLocation),
           allDay: true,
           recurrenceRule:
               RecurrenceRule(RecurrenceFrequency.Daily, interval: 365));
       final upsertEventResult =
           await DeviceCalendarProvider.createOrUpdateEvent(event);
-      final _devCalEventId = upsertEventResult.data;
+      final _devCalEventId = upsertEventResult!.data!;
       if (_devCalEventId !=
-          _eventEditorModel.calendarEvent.deviceCalendarEventId) {
-        final newCalendarEvent = _eventEditorModel.calendarEvent
+          _eventEditorModel!.calendarEvent.deviceCalendarEventId) {
+        final newCalendarEvent = _eventEditorModel!.calendarEvent
             .copyWith(deviceCalendarEventId: _devCalEventId);
         _eventEditorModel =
-            _eventEditorModel.copyWith(calendarEvent: newCalendarEvent);
+            _eventEditorModel!.copyWith(calendarEvent: newCalendarEvent);
       }
     }
   }
 
   Future saveEventEditorEvent() async {
-    await DBProvider.db.saveEvent(_eventEditorModel.calendarEvent);
+    await DBProvider.db.saveEvent(_eventEditorModel!.calendarEvent);
   }
 
   void clearEventEditorState() {
@@ -55,10 +59,11 @@ class EventEditorLogic {
   }
 
   void setEventEditorState({
-    @required EditorMode editorTitle,
-    @required ZorastrianDate zorastrianDate,
-    @required CalendarEvent calendarEvent,
+    required EditorMode editorTitle,
+    required ZorastrianDate zorastrianDate,
+    required CalendarEvent calendarEvent,
   }) {
+    tz.initializeTimeZones();
     _eventEditorModel = EventEditorModel(
         editorTitle: editorTitle,
         calendarEvent: calendarEvent,
@@ -67,118 +72,119 @@ class EventEditorLogic {
 
   void setEventEditorEventTitle(String title) {
     final newCalendarEvent =
-        _eventEditorModel.calendarEvent.copyWith(title: title);
+        _eventEditorModel!.calendarEvent.copyWith(title: title);
 
     _eventEditorModel =
-        _eventEditorModel.copyWith(calendarEvent: newCalendarEvent);
+        _eventEditorModel!.copyWith(calendarEvent: newCalendarEvent);
   }
 
   void setEventEditorCalendarType(CalendarType calendarType) {
-    final zd = _eventEditorModel.zorastrianDate;
+    final zd = _eventEditorModel!.zorastrianDate;
     final newCalendarDayLookupId = zd.getDayId(calendarType.name);
     final newCalendarTypeId = calendarType.id;
-    final newCalendarEvent = _eventEditorModel.calendarEvent.copyWith(
+    final newCalendarEvent = _eventEditorModel!.calendarEvent.copyWith(
         calendarDayLookupId: newCalendarDayLookupId,
         calendarTypeId: newCalendarTypeId);
     _eventEditorModel =
-        _eventEditorModel.copyWith(calendarEvent: newCalendarEvent);
+        _eventEditorModel!.copyWith(calendarEvent: newCalendarEvent);
   }
 
   Future setEventEditorMah(String mahName) async {
     final calendarType = (await DBProvider.db.calendarTypes)
-        .where((x) => x.id == _eventEditorModel.calendarEvent.calendarTypeId)
+        .where((x) => x.id == _eventEditorModel!.calendarEvent.calendarTypeId)
         .single;
 
     final oldMahName =
-        _eventEditorModel.zorastrianDate.getMahName(calendarType.name);
+        _eventEditorModel!.zorastrianDate.getMahName(calendarType.name);
     final newMahName = mahName;
     if (oldMahName == newMahName) return;
 
     String rojName =
-        _eventEditorModel.zorastrianDate.getRojName(calendarType.name);
+        _eventEditorModel!.zorastrianDate.getRojName(calendarType.name);
 
     if (DBProvider.gatha_days.contains(rojName) &&
         newMahName != "Asfandarmad") {
       rojName = "Hormazd";
     }
 
-    final year = _eventEditorModel.zorastrianDate.getYear(calendarType.name);
+    final year = _eventEditorModel!.zorastrianDate.getYear(calendarType.name);
 
     final newZorastrianDate = await DBProvider.db
         .getZorastrianDateRaw(calendarType, rojName, mahName, year);
     final newCalendarDayLookupId =
         newZorastrianDate.getDayId(calendarType.name);
     final newCalendarMasterLookupId = newZorastrianDate.id;
-    final newCalendarEvent = _eventEditorModel.calendarEvent.copyWith(
+    final newCalendarEvent = _eventEditorModel!.calendarEvent.copyWith(
         calendarDayLookupId: newCalendarDayLookupId,
         calendarMasterLookupId: newCalendarMasterLookupId);
-    _eventEditorModel = _eventEditorModel.copyWith(
+    _eventEditorModel = _eventEditorModel!.copyWith(
         calendarEvent: newCalendarEvent, zorastrianDate: newZorastrianDate);
   }
 
   Future setEventEditorRoj(String rojName) async {
     final calendarType = (await DBProvider.db.calendarTypes)
-        .where((x) => x.id == _eventEditorModel.calendarEvent.calendarTypeId)
+        .where((x) => x.id == _eventEditorModel!.calendarEvent.calendarTypeId)
         .single;
     final mahName =
-        _eventEditorModel.zorastrianDate.getMahName(calendarType.name);
-    final year = _eventEditorModel.zorastrianDate.getYear(calendarType.name);
+        _eventEditorModel!.zorastrianDate.getMahName(calendarType.name);
+    final year = _eventEditorModel!.zorastrianDate.getYear(calendarType.name);
 
     final newZorastrianDate = await DBProvider.db
         .getZorastrianDateRaw(calendarType, rojName, mahName, year);
     final newCalendarDayLookupId =
         newZorastrianDate.getDayId(calendarType.name);
     final newCalendarMasterLookupId = newZorastrianDate.id;
-    final newCalendarEvent = _eventEditorModel.calendarEvent.copyWith(
+    final newCalendarEvent = _eventEditorModel!.calendarEvent.copyWith(
         calendarDayLookupId: newCalendarDayLookupId,
         calendarMasterLookupId: newCalendarMasterLookupId);
 
-    _eventEditorModel = _eventEditorModel.copyWith(
+    _eventEditorModel = _eventEditorModel!.copyWith(
         calendarEvent: newCalendarEvent, zorastrianDate: newZorastrianDate);
   }
 
   Future setEventEditorYear(int year) async {
     final calendarType = (await DBProvider.db.calendarTypes)
-        .where((x) => x.id == _eventEditorModel.calendarEvent.calendarTypeId)
+        .where((x) => x.id == _eventEditorModel!.calendarEvent.calendarTypeId)
         .single;
     final mahName =
-        _eventEditorModel.zorastrianDate.getMahName(calendarType.name);
+        _eventEditorModel!.zorastrianDate.getMahName(calendarType.name);
     final rojName =
-        _eventEditorModel.zorastrianDate.getRojName(calendarType.name);
+        _eventEditorModel!.zorastrianDate.getRojName(calendarType.name);
     final newZorastrianDate = await DBProvider.db
         .getZorastrianDateRaw(calendarType, rojName, mahName, year);
     final newCalendarDayLookupId =
         newZorastrianDate.getDayId(calendarType.name);
     final newCalendarMasterLookupId = newZorastrianDate.id;
-    final newCalendarEvent = _eventEditorModel.calendarEvent.copyWith(
+    final newCalendarEvent = _eventEditorModel!.calendarEvent.copyWith(
         calendarDayLookupId: newCalendarDayLookupId,
         calendarMasterLookupId: newCalendarMasterLookupId);
-    _eventEditorModel = _eventEditorModel.copyWith(
+    _eventEditorModel = _eventEditorModel!.copyWith(
         calendarEvent: newCalendarEvent, zorastrianDate: newZorastrianDate);
   }
 
   Future setEventEditorDate(DateTime date) async {
     final input = DateTime(date.year, date.month, date.day);
     final calendarType = (await DBProvider.db.calendarTypes)
-        .where((x) => x.id == _eventEditorModel.calendarEvent.calendarTypeId)
+        .where((x) => x.id == _eventEditorModel!.calendarEvent.calendarTypeId)
         .single;
     final newZorastrianDate = await DBProvider.db.getZorastrianDate(input);
     final newCalendarDayLookupId =
         newZorastrianDate.getDayId(calendarType.name);
     final newCalendarMasterLookupId = newZorastrianDate.id;
-    final newCalendarEvent = _eventEditorModel.calendarEvent.copyWith(
+    final newCalendarEvent = _eventEditorModel!.calendarEvent.copyWith(
         calendarDayLookupId: newCalendarDayLookupId,
         calendarMasterLookupId: newCalendarMasterLookupId);
-    _eventEditorModel = _eventEditorModel.copyWith(
+    _eventEditorModel = _eventEditorModel!.copyWith(
         calendarEvent: newCalendarEvent, zorastrianDate: newZorastrianDate);
   }
 
   Future<EventEditorViewModel> getEventEditorData() async {
-    final String editorTitle = (_eventEditorModel.editorTitle == EditorMode.Add)
-        ? "Add Event"
-        : "Edit Event";
-    final ZorastrianDate zorastrianDate = _eventEditorModel.zorastrianDate;
-    final CalendarEvent calendarEvent = _eventEditorModel.calendarEvent;
+    final String editorTitle =
+        (_eventEditorModel!.editorTitle == EditorMode.Add)
+            ? "Add Event"
+            : "Edit Event";
+    final ZorastrianDate zorastrianDate = _eventEditorModel!.zorastrianDate;
+    final CalendarEvent calendarEvent = _eventEditorModel!.calendarEvent;
 
     final eventTitle = calendarEvent.title;
     final cts = await DBProvider.db.calendarTypes;
@@ -214,7 +220,7 @@ class EventEditorLogic {
   }
 
   Future<void> initializeDeviceCalendar() async {
-    final calendars = (await DeviceCalendarProvider.retrieveCalendars()).data;
+    final calendars = (await DeviceCalendarProvider.retrieveCalendars()).data!;
     final devCal = calendars.where((calendar) =>
         calendar.name == DeviceCalendarProvider.local_account_name);
 
@@ -223,6 +229,6 @@ class EventEditorLogic {
         : (await DeviceCalendarProvider.createCalendar(
                 DeviceCalendarProvider.local_account_name, Colors.red))
             .data;
-    await DBProvider.db.setDeviceCalendarId(deviceCalendarId);
+    await DBProvider.db.setDeviceCalendarId(deviceCalendarId!);
   }
 }

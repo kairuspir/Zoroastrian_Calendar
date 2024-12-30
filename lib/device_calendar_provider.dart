@@ -1,7 +1,6 @@
 import 'dart:collection';
 
 import 'package:device_calendar/device_calendar.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class DeviceCalendarProvider {
@@ -13,9 +12,9 @@ class DeviceCalendarProvider {
     Result<UnmodifiableListView<Calendar>> result;
     try {
       var permissionsGranted = await _deviceCalendarPlugin.hasPermissions();
-      if (permissionsGranted.isSuccess && !permissionsGranted.data) {
+      if (permissionsGranted.isSuccess && !permissionsGranted.data!) {
         permissionsGranted = await _deviceCalendarPlugin.requestPermissions();
-        if (!permissionsGranted.isSuccess || !permissionsGranted.data) {
+        if (!permissionsGranted.isSuccess || !permissionsGranted.data!) {
           result = Result<UnmodifiableListView<Calendar>>();
         }
       }
@@ -23,6 +22,7 @@ class DeviceCalendarProvider {
       result = await _deviceCalendarPlugin.retrieveCalendars();
     } on PlatformException catch (e) {
       print(e);
+      result = Result<UnmodifiableListView<Calendar>>();
     }
     return result;
   }
@@ -36,7 +36,7 @@ class DeviceCalendarProvider {
     );
   }
 
-  static Future<Result<String>> createOrUpdateEvent(Event event) async {
+  static Future<Result<String>?> createOrUpdateEvent(Event event) async {
     DeviceCalendarPlugin _deviceCalendarPlugin = DeviceCalendarPlugin();
     return await _deviceCalendarPlugin.createOrUpdateEvent(event);
   }
@@ -44,9 +44,9 @@ class DeviceCalendarProvider {
   static Future<bool> isPermissionsGranted() async {
     var result = true;
     var permissionsGranted = await _deviceCalendarPlugin.hasPermissions();
-    if (permissionsGranted.isSuccess && !permissionsGranted.data) {
+    if (permissionsGranted.isSuccess && !permissionsGranted.data!) {
       permissionsGranted = await _deviceCalendarPlugin.requestPermissions();
-      if (!permissionsGranted.isSuccess || !permissionsGranted.data) {
+      if (!permissionsGranted.isSuccess || !permissionsGranted.data!) {
         result = false;
       }
     }
@@ -60,7 +60,7 @@ class DeviceCalendarProvider {
         RetrieveEventsParams(eventIds: [eventId]);
     final eventsResult = await _deviceCalendarPlugin.retrieveEvents(
         calendarId, retrieveEventsParams);
-    result = eventsResult.data.isNotEmpty;
+    result = eventsResult.data!.isNotEmpty;
     return result;
   }
 }

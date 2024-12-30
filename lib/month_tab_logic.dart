@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:zoroastriancalendar/database.dart';
 import 'package:zoroastriancalendar/models/calendar_event.dart';
@@ -8,10 +7,8 @@ import 'package:zoroastriancalendar/models/month_tab_view_model.dart';
 import 'package:zoroastriancalendar/models/zorastrian_date.dart';
 import 'package:zoroastriancalendar/utilities.dart';
 
-import 'utilities.dart';
-
 class MonthTabLogic {
-  MonthTabModel model;
+  late MonthTabModel model;
   Future<List<String>> get mahCollection async =>
       await DBProvider.db.mahCollection;
   final yearCollection = [for (var i = 1900; i <= 2100; i += 1) i]; //1900-2100
@@ -60,7 +57,6 @@ class MonthTabLogic {
         );
         model = model.copyWith(selectedDate: newDate);
         break;
-      default:
     }
   }
 
@@ -107,7 +103,6 @@ class MonthTabLogic {
         );
         model = model.copyWith(selectedDate: newDate);
         break;
-      default:
     }
   }
 
@@ -137,7 +132,6 @@ class MonthTabLogic {
         );
         model = model.copyWith(selectedDate: newDate);
         break;
-      default:
     }
   }
 
@@ -175,7 +169,6 @@ class MonthTabLogic {
         );
         model = model.copyWith(selectedDate: newDate);
         break;
-      default:
     }
   }
 
@@ -214,7 +207,6 @@ class MonthTabLogic {
         );
         model = model.copyWith(selectedDate: newDate);
         break;
-      default:
     }
   }
 
@@ -251,7 +243,6 @@ class MonthTabLogic {
         );
         model = model.copyWith(selectedDate: newDate);
         break;
-      default:
     }
   }
 
@@ -263,7 +254,7 @@ class MonthTabLogic {
     tableData.addAll(_getTableBody(rawList));
     final mc = (model.mode == MonthTabCalendarMode.Zoroastrian)
         ? await DBProvider.db.mahCollection
-        : Month.values.map((e) => describeEnum(e)).toList();
+        : Month.values.map((e) => e.name).toList();
     final yc = (model.mode == MonthTabCalendarMode.Zoroastrian)
         ? salCollection
         : yearCollection;
@@ -361,7 +352,7 @@ class MonthTabLogic {
   }
 
   List<DayInMonthTabViewModel> _getPostfixedEmptyCells(DateTime lastDate) {
-    int count;
+    late int count;
     switch (lastDate.weekday) {
       case DateTime.sunday:
         count = 6;

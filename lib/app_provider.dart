@@ -12,13 +12,13 @@ class AppProvider extends InheritedWidget {
   final Widget child;
 
   const AppProvider({
-    this.themeColor,
-    this.themeMode,
-    this.calendarType,
-    this.deviceCalendarState,
-    this.callSetState,
-    this.child,
-  });
+    required this.themeColor,
+    required this.themeMode,
+    required this.calendarType,
+    required this.deviceCalendarState,
+    required this.callSetState,
+    required this.child,
+  }) : super(child: child);
 
   @override
   bool updateShouldNotify(AppProvider oldWidget) {
@@ -29,6 +29,6 @@ class AppProvider extends InheritedWidget {
         oldWidget.callSetState != callSetState;
   }
 
-  static AppProvider of(BuildContext context) =>
+  static AppProvider? of(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<AppProvider>();
 }

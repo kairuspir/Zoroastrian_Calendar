@@ -9,9 +9,9 @@ class MyAppViewModel {
   final DeviceCalendarState deviceCalendarState;
 
   const MyAppViewModel({
-    @required this.themeColor,
-    @required this.themeMode,
-    @required this.calendarType,
-    @required this.deviceCalendarState,
+    required this.themeColor,
+    required this.themeMode,
+    required this.calendarType,
+    required this.deviceCalendarState,
   });
 }

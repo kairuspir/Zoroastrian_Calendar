@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 import 'calendar_type.dart';
 
 class EventEditorViewModel {
@@ -16,15 +14,15 @@ class EventEditorViewModel {
   final DateTime selectedDate;
 
   const EventEditorViewModel({
-    @required this.rojCollection,
-    @required this.mahCollection,
-    @required this.calendarTypes,
-    @required this.selectedRoj,
-    @required this.selectedMah,
-    @required this.selectedYear,
-    @required this.selectedCalendarType,
-    @required this.selectedDate,
-    @required this.eventTitle,
-    @required this.editorTitle,
+    required this.rojCollection,
+    required this.mahCollection,
+    required this.calendarTypes,
+    required this.selectedRoj,
+    required this.selectedMah,
+    required this.selectedYear,
+    required this.selectedCalendarType,
+    required this.selectedDate,
+    required this.eventTitle,
+    required this.editorTitle,
   });
 }

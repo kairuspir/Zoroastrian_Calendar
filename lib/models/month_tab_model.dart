@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 import 'enum_models.dart';
 
 class MonthTabModel {
@@ -8,14 +6,14 @@ class MonthTabModel {
   final String calendarType;
 
   const MonthTabModel(
-      {@required this.mode,
-      @required this.selectedDate,
-      @required this.calendarType});
+      {required this.mode,
+      required this.selectedDate,
+      required this.calendarType});
 
   MonthTabModel copyWith(
-          {MonthTabCalendarMode mode,
-          DateTime selectedDate,
-          String calendarType}) =>
+          {MonthTabCalendarMode? mode,
+          DateTime? selectedDate,
+          String? calendarType}) =>
       MonthTabModel(
         mode: mode ?? this.mode,
         selectedDate: selectedDate ?? this.selectedDate,

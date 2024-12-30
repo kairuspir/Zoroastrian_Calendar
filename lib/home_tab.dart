@@ -17,16 +17,16 @@ class HomeTab extends StatefulWidget {
   static const androidIcon = Icon(Icons.home);
   static const iosIcon = Icon(CupertinoIcons.home);
   final DateTime selectedDate;
-  HomeTab({@required this.selectedDate});
+  HomeTab({required this.selectedDate});
 
   @override
   _HomeTabState createState() => _HomeTabState();
 }
 
 class _HomeTabState extends State<HomeTab> with TickerProviderStateMixin {
-  DateTime _selectedDate;
-  TabController _tabController;
-  CalendarType calendarType;
+  late DateTime _selectedDate;
+  late TabController _tabController;
+  late CalendarType calendarType;
 
   _setToday() {
     setState(() {
@@ -35,14 +35,14 @@ class _HomeTabState extends State<HomeTab> with TickerProviderStateMixin {
   }
 
   Future _setDate() async {
-    DateTime pickedDate = await showDatePicker(
+    DateTime? pickedDate = await showDatePicker(
         context: context,
         initialDate: _selectedDate,
         firstDate: DateTime(1900, 1, 1),
         lastDate: DateTime(2100, 12, 31));
 
     if (pickedDate != null) {
-      TimeOfDay pickedTime = await showTimePicker(
+      TimeOfDay? pickedTime = await showTimePicker(
           context: context, initialTime: TimeOfDay.fromDateTime(_selectedDate));
 
       setState(() {
@@ -105,7 +105,7 @@ class _HomeTabState extends State<HomeTab> with TickerProviderStateMixin {
               Text("Today's Events"),
             ],
           ),
-        ...?events
+        ...events
             .map((x) => Row(
                   children: <Widget>[
                     Expanded(
@@ -309,9 +309,12 @@ class _HomeTabState extends State<HomeTab> with TickerProviderStateMixin {
                                 zorastrianDate: data.zorastrianDate,
                                 calendarEvent: CalendarEvent(
                                   id: 0,
+                                  calendarMasterLookupId: 0,
                                   calendarTypeId: calendarTypeId,
                                   calendarDayLookupId: calendarDayLookupId,
+                                  title: "",
                                   description: "",
+                                  deviceCalendarEventId: "",
                                   isDeleted: 0,
                                 ),
                               ),
@@ -345,7 +348,7 @@ class _HomeTabState extends State<HomeTab> with TickerProviderStateMixin {
 
   @override
   void didChangeDependencies() {
-    final calendarType = AppProvider.of(context).calendarType;
+    final calendarType = AppProvider.of(context)!.calendarType;
 
     if (calendarType != this.calendarType) {
       this.calendarType = calendarType;

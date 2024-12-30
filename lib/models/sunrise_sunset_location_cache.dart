@@ -17,12 +17,14 @@ class SunriseSunsetLocationCache {
   final SunriseSunsetData sunriseSunsetData;
 
   const SunriseSunsetLocationCache(
-      {this.date, this.locationData, this.sunriseSunsetData});
+      {required this.date,
+      required this.locationData,
+      required this.sunriseSunsetData});
 
   SunriseSunsetLocationCache copyWith({
-    DateTime date,
-    LocationData locationData,
-    SunriseSunsetData sunriseSunsetData,
+    DateTime? date,
+    LocationData? locationData,
+    SunriseSunsetData? sunriseSunsetData,
   }) {
     return SunriseSunsetLocationCache(
       date: date ?? this.date,

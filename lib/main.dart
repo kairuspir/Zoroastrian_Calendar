@@ -15,7 +15,7 @@ void main() => runApp(MyApp());
 
 class MyApp extends StatefulWidget {
   // This widget is the root of your application.
-  MyApp({Key key}) : super(key: key);
+  MyApp({Key? key}) : super(key: key);
 
   @override
   _MyAppPageState createState() => _MyAppPageState();
@@ -26,13 +26,14 @@ class _MyAppPageState extends State<MyApp> {
     setState(() {});
   }
 
-  Future onSelectNotification(String payload) async {
+  Future onSelectNotification(String? payload) async {
     if (payload != null) {
       debugPrint('notification payload: ' + payload);
     }
     await Navigator.push(
       context,
-      new MaterialPageRoute(builder: (context) => MyHomePage()),
+      new MaterialPageRoute(
+          builder: (context) => MyHomePage(title: 'Zorastrian Calendar')),
     );
   }
 
@@ -52,16 +53,7 @@ class _MyAppPageState extends State<MyApp> {
               theme: ThemeData(
                 primarySwatch: data.themeColor,
               ),
-              darkTheme: ThemeData(
-                brightness: Brightness.dark,
-                primarySwatch: data.themeColor,
-                toggleableActiveColor: data.themeColor[200],
-                accentColor: data.themeColor[200],
-                textSelectionTheme: TextSelectionThemeData(
-                  selectionHandleColor: data.themeColor[400],
-                ),
-                buttonColor: data.themeColor[600],
-              ),
+              darkTheme: ThemeData.dark(),
               themeMode: data.themeMode,
               builder: (context, child) {
                 return CupertinoTheme(
@@ -78,7 +70,7 @@ class _MyAppPageState extends State<MyApp> {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  MyHomePage({Key? key, required this.title}) : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -121,7 +113,6 @@ class _MyHomePageState extends State<MyHomePage> {
           _activeTabWidget = SettingsTab();
           break;
         case Tabname.Home:
-        default:
           _activeTabTitle = HomeTab.title;
           _activeTabWidget = HomeTab(
             selectedDate: DateTime.now(),
@@ -231,7 +222,7 @@ class _MyHomePageState extends State<MyHomePage> {
             );
           default:
             assert(false, 'Unexpected tab');
-            return null;
+            return CupertinoTabView();
         }
       },
     );

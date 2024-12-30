@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:zoroastriancalendar/models/calendar_event.dart';
 
@@ -17,15 +16,15 @@ class MonthTabViewModel {
   final int secondaryCalendarToYear;
 
   const MonthTabViewModel(
-      {@required this.tableData,
-      @required this.monthCollection,
-      @required this.yearCollection,
-      @required this.primaryCalendarMonth,
-      @required this.primaryCalendarYear,
-      @required this.secondaryCalendarFromMonth,
-      @required this.secondaryCalendarToMonth,
-      @required this.secondaryCalendarFromYear,
-      @required this.secondaryCalendarToYear});
+      {required this.tableData,
+      required this.monthCollection,
+      required this.yearCollection,
+      required this.primaryCalendarMonth,
+      required this.primaryCalendarYear,
+      required this.secondaryCalendarFromMonth,
+      required this.secondaryCalendarToMonth,
+      required this.secondaryCalendarFromYear,
+      required this.secondaryCalendarToYear});
 }
 
 class DayInMonthTabViewModel {
@@ -36,7 +35,7 @@ class HeaderCellInDayInMonthTabViewModel extends DayInMonthTabViewModel {
   final String nameOfDay;
   final String nameOfDayShort;
   const HeaderCellInDayInMonthTabViewModel(
-      {@required this.nameOfDay, @required this.nameOfDayShort});
+      {required this.nameOfDay, required this.nameOfDayShort});
 }
 
 class BodyCellInDayInMonthTabViewModel extends DayInMonthTabViewModel {
@@ -59,13 +58,13 @@ class PopulatedBodyCellInDayInMonthTabViewModel
   final List<CalendarEvent> events;
 
   const PopulatedBodyCellInDayInMonthTabViewModel(
-      {@required this.isToday,
-      @required this.dayOfMonth,
-      @required this.gregorianMonthName,
-      @required this.rojName,
-      @required this.mahName,
-      @required this.gregorianDate,
-      @required this.events});
+      {required this.isToday,
+      required this.dayOfMonth,
+      required this.gregorianMonthName,
+      required this.rojName,
+      required this.mahName,
+      required this.gregorianDate,
+      required this.events});
 
   factory PopulatedBodyCellInDayInMonthTabViewModel.fromZorastrianDate(
           ZorastrianDate date,

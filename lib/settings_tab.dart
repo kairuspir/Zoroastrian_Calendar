@@ -52,7 +52,7 @@ class _SettingsTabState extends State<SettingsTab> {
         color: color,
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.8),
+            color: color.withValues(alpha: 255 * 0.8),
             offset: Offset(1.0, 2.0),
             blurRadius: 3.0,
           ),
@@ -84,8 +84,8 @@ class _SettingsTabState extends State<SettingsTab> {
         context: context,
         builder: (BuildContext context) {
           Orientation orientation = MediaQuery.of(context).orientation;
-          final themeColor = AppProvider.of(context).themeColor;
-          final callSetState = AppProvider.of(context).callSetState;
+          final themeColor = AppProvider.of(context)!.themeColor;
+          final callSetState = AppProvider.of(context)!.callSetState;
 
           return AlertDialog(
             title: Text("Select a color"),
@@ -109,10 +109,10 @@ class _SettingsTabState extends State<SettingsTab> {
   }
 
   Widget _buildList() {
-    final themeColor = AppProvider.of(context).themeColor;
-    final themes = AppProvider.of(context).themeMode;
-    final callSetState = AppProvider.of(context).callSetState;
-    final calendarType = AppProvider.of(context).calendarType;
+    final themeColor = AppProvider.of(context)!.themeColor;
+    final themes = AppProvider.of(context)!.themeMode;
+    final callSetState = AppProvider.of(context)!.callSetState;
+    final calendarType = AppProvider.of(context)!.calendarType;
 
     return MyFutureBuilder<List<CalendarType>>(
       future: DBProvider.db.calendarTypes,
@@ -146,7 +146,7 @@ class _SettingsTabState extends State<SettingsTab> {
                       color: themeColor,
                       boxShadow: [
                         BoxShadow(
-                          color: themeColor.withOpacity(0.8),
+                          color: themeColor.withValues(alpha: 255 * 0.8),
                           offset: Offset(1.0, 2.0),
                           blurRadius: 3.0,
                         ),
@@ -182,7 +182,7 @@ class _SettingsTabState extends State<SettingsTab> {
                   ],
                   value: themes,
                   onChanged: (value) async {
-                    await DBProvider.db.setTheme(value);
+                    await DBProvider.db.setTheme(value!);
                     callSetState();
                   }),
             ),
@@ -195,7 +195,7 @@ class _SettingsTabState extends State<SettingsTab> {
                     .toList(),
                 value: calendarType,
                 onChanged: (value) async {
-                  await DBProvider.db.setPreferredCalendar(value);
+                  await DBProvider.db.setPreferredCalendar(value!);
                   callSetState();
                 },
               ),

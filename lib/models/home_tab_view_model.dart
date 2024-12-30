@@ -12,13 +12,13 @@ class HomeTabViewModel {
   final List<CalendarEvent> fasliEvents;
 
   const HomeTabViewModel({
-    this.zorastrianDate,
-    this.shahanshahiGeh,
-    this.kadmiGeh,
-    this.fasliGeh,
-    this.chog,
-    this.shahanshahiEvents,
-    this.kadmiEvents,
-    this.fasliEvents,
+    required this.zorastrianDate,
+    required this.shahanshahiGeh,
+    required this.kadmiGeh,
+    required this.fasliGeh,
+    required this.chog,
+    required this.shahanshahiEvents,
+    required this.kadmiEvents,
+    required this.fasliEvents,
   });
 }

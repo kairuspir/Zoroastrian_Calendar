@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:zoroastriancalendar/app_provider.dart';
 import 'package:zoroastriancalendar/home_tab.dart';
@@ -15,7 +14,7 @@ import 'package:zoroastriancalendar/widgets.dart';
 
 class MonthTab extends StatefulWidget {
   static const title = 'Month';
-  static const androidIcon = Icon(MdiIcons.calendarMonth);
+  static final androidIcon = Icon(MdiIcons.calendarMonth);
   static const iosIcon = Icon(CupertinoIcons.calendar);
 
   @override
@@ -24,8 +23,8 @@ class MonthTab extends StatefulWidget {
 
 class _MonthTabState extends State<MonthTab> {
   final _logic = MonthTabLogic();
-  AppProvider appProvider;
-  Future<MonthTabViewModel> viewmodel;
+  late AppProvider appProvider;
+  late Future<MonthTabViewModel> viewmodel;
   @override
   void initState() {
     super.initState();
@@ -38,7 +37,7 @@ class _MonthTabState extends State<MonthTab> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final appProvider = AppProvider.of(context);
+    final appProvider = AppProvider.of(context)!;
     if (appProvider != this.appProvider) {
       final calendarType = appProvider.calendarType.name;
       final now = DateTime.now();
@@ -130,7 +129,7 @@ class _MonthTabState extends State<MonthTab> {
                               );
                             }).toList(),
                             value: data.primaryCalendarMonth,
-                            onChanged: (String value) => goToMonth(value),
+                            onChanged: (String? value) => goToMonth(value!),
                           ),
                           DropdownButton<int>(
                             items: data.yearCollection
@@ -141,7 +140,7 @@ class _MonthTabState extends State<MonthTab> {
                               );
                             }).toList(),
                             value: data.primaryCalendarYear,
-                            onChanged: (int value) => goToYear(value),
+                            onChanged: (int? value) => goToYear(value!),
                           ),
                         ],
                       ),
@@ -208,13 +207,14 @@ class _MonthTabState extends State<MonthTab> {
 class DayCell extends StatelessWidget {
   final DayInMonthTabViewModel viewModel;
 
-  DayCell({this.viewModel});
+  DayCell({required this.viewModel});
   @override
   Widget build(BuildContext context) {
     if (this.viewModel is HeaderCellInDayInMonthTabViewModel) {
-      return HeaderCell(viewModel: viewModel);
+      return HeaderCell(
+          viewModel: viewModel as HeaderCellInDayInMonthTabViewModel);
     } else {
-      return BodyCell(viewModel: viewModel);
+      return BodyCell(viewModel: viewModel as BodyCellInDayInMonthTabViewModel);
     }
   }
 }
@@ -222,7 +222,7 @@ class DayCell extends StatelessWidget {
 class HeaderCell extends StatelessWidget {
   final HeaderCellInDayInMonthTabViewModel viewModel;
 
-  HeaderCell({this.viewModel});
+  HeaderCell({required this.viewModel});
   @override
   Widget build(BuildContext context) {
     final nameOfDay =
@@ -236,12 +236,12 @@ class HeaderCell extends StatelessWidget {
 class BodyCell extends StatelessWidget {
   final BodyCellInDayInMonthTabViewModel viewModel;
 
-  BodyCell({this.viewModel});
+  BodyCell({required this.viewModel});
   @override
   Widget build(BuildContext context) {
     if (viewModel is PopulatedBodyCellInDayInMonthTabViewModel) {
       final pvm = viewModel as PopulatedBodyCellInDayInMonthTabViewModel;
-      final mode = MonthTabProvider.of(context).mode;
+      final mode = MonthTabProvider.of(context)!.mode;
       final backgroundColor = Theme.of(context).highlightColor;
       final primaryColor = Theme.of(context).colorScheme.primary;
       return InkWell(
