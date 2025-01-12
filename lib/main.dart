@@ -15,7 +15,7 @@ void main() => runApp(MyApp());
 
 class MyApp extends StatefulWidget {
   // This widget is the root of your application.
-  MyApp({Key? key}) : super(key: key);
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   _MyAppPageState createState() => _MyAppPageState();

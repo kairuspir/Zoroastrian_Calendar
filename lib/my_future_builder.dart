@@ -23,7 +23,7 @@ class MyFutureBuilder<T> extends StatelessWidget {
               return Center(
                   child: CircularProgressIndicator(
                       valueColor: AlwaysStoppedAnimation<Color>(
-                          AppProvider.of(context)!.themeColor)));
+                          AppProvider.of(context)?.themeColor ?? Colors.blue)));
           }
         });
   }
