@@ -9,7 +9,7 @@ class UserPreference {
   final String name;
   final String value;
 
-  const UserPreference({this.name, this.value});
+  const UserPreference({required this.name, required this.value});
 
   factory UserPreference.fromMap(Map<String, dynamic> json) => UserPreference(
         name: json["Name"],

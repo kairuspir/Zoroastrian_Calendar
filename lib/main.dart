@@ -6,6 +6,7 @@ import 'database.dart';
 import 'events_list_tab.dart';
 import 'home_tab.dart';
 import 'models/my_app_view_model.dart';
+import 'month_tab.dart';
 import 'my_future_builder.dart';
 import 'settings_tab.dart';
 import 'widgets.dart';
@@ -14,7 +15,7 @@ void main() => runApp(MyApp());
 
 class MyApp extends StatefulWidget {
   // This widget is the root of your application.
-  MyApp({Key key}) : super(key: key);
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   _MyAppPageState createState() => _MyAppPageState();
@@ -25,13 +26,14 @@ class _MyAppPageState extends State<MyApp> {
     setState(() {});
   }
 
-  Future onSelectNotification(String payload) async {
+  Future onSelectNotification(String? payload) async {
     if (payload != null) {
       debugPrint('notification payload: ' + payload);
     }
     await Navigator.push(
       context,
-      new MaterialPageRoute(builder: (context) => MyHomePage()),
+      new MaterialPageRoute(
+          builder: (context) => MyHomePage(title: 'Zorastrian Calendar')),
     );
   }
 
@@ -51,14 +53,7 @@ class _MyAppPageState extends State<MyApp> {
               theme: ThemeData(
                 primarySwatch: data.themeColor,
               ),
-              darkTheme: ThemeData(
-                brightness: Brightness.dark,
-                primarySwatch: data.themeColor,
-                toggleableActiveColor: data.themeColor[200],
-                accentColor: data.themeColor[200],
-                textSelectionHandleColor: data.themeColor[400],
-                buttonColor: data.themeColor[600],
-              ),
+              darkTheme: ThemeData.dark(),
               themeMode: data.themeMode,
               builder: (context, child) {
                 return CupertinoTheme(
@@ -75,7 +70,7 @@ class _MyAppPageState extends State<MyApp> {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  MyHomePage({Key? key, required this.title}) : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -94,7 +89,9 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   String _activeTabTitle = HomeTab.title;
-  Widget _activeTabWidget = HomeTab();
+  Widget _activeTabWidget = HomeTab(
+    selectedDate: DateTime.now(),
+  );
   void _setTab(Tabname tabname) {
     setState(() {
       // This call to setState tells the Flutter framework that something has
@@ -103,6 +100,10 @@ class _MyHomePageState extends State<MyHomePage> {
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
       switch (tabname) {
+        case Tabname.Month:
+          _activeTabTitle = MonthTab.title;
+          _activeTabWidget = MonthTab();
+          break;
         case Tabname.Events:
           _activeTabTitle = EventsListTab.title;
           _activeTabWidget = EventsListTab();
@@ -112,9 +113,10 @@ class _MyHomePageState extends State<MyHomePage> {
           _activeTabWidget = SettingsTab();
           break;
         case Tabname.Home:
-        default:
           _activeTabTitle = HomeTab.title;
-          _activeTabWidget = HomeTab();
+          _activeTabWidget = HomeTab(
+            selectedDate: DateTime.now(),
+          );
       }
     });
   }
@@ -125,47 +127,58 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(_activeTabTitle),
       ),
       drawer: Drawer(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            DrawerHeader(
-              decoration: BoxDecoration(color: Theme.of(context).primaryColor),
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 20),
-                child: Icon(Icons.perm_identity,
-                    color: Theme.of(context).secondaryHeaderColor, size: 96),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              DrawerHeader(
+                decoration:
+                    BoxDecoration(color: Theme.of(context).primaryColor),
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 20),
+                  child: Icon(Icons.perm_identity,
+                      color: Theme.of(context).secondaryHeaderColor, size: 96),
+                ),
               ),
-            ),
-            ListTile(
-              leading: HomeTab.androidIcon,
-              title: Text(HomeTab.title),
-              onTap: () {
-                Navigator.pop(context);
-                _setTab(Tabname.Home);
-              },
-            ),
-            ListTile(
-              leading: EventsListTab.androidIcon,
-              title: Text(EventsListTab.title),
-              onTap: () {
-                Navigator.pop(context);
-                _setTab(Tabname.Events);
-              },
-            ),
-            // Long drawer contents are often segmented.
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Divider(),
-            ),
-            ListTile(
-              leading: SettingsTab.androidIcon,
-              title: Text(SettingsTab.title),
-              onTap: () {
-                Navigator.pop(context);
-                _setTab(Tabname.Settings);
-              },
-            )
-          ],
+              ListTile(
+                leading: HomeTab.androidIcon,
+                title: Text(HomeTab.title),
+                onTap: () {
+                  Navigator.pop(context);
+                  _setTab(Tabname.Home);
+                },
+              ),
+              ListTile(
+                leading: MonthTab.androidIcon,
+                title: Text(MonthTab.title),
+                onTap: () {
+                  Navigator.pop(context);
+                  _setTab(Tabname.Month);
+                },
+              ),
+              ListTile(
+                leading: EventsListTab.androidIcon,
+                title: Text(EventsListTab.title),
+                onTap: () {
+                  Navigator.pop(context);
+                  _setTab(Tabname.Events);
+                },
+              ),
+              // Long drawer contents are often segmented.
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Divider(),
+              ),
+              ListTile(
+                leading: SettingsTab.androidIcon,
+                title: Text(SettingsTab.title),
+                onTap: () {
+                  Navigator.pop(context);
+                  _setTab(Tabname.Settings);
+                },
+              )
+            ],
+          ),
         ),
       ),
       body: _activeTabWidget,
@@ -178,6 +191,8 @@ class _MyHomePageState extends State<MyHomePage> {
         items: [
           BottomNavigationBarItem(label: HomeTab.title, icon: HomeTab.iosIcon),
           BottomNavigationBarItem(
+              label: MonthTab.title, icon: MonthTab.iosIcon),
+          BottomNavigationBarItem(
               label: EventsListTab.title, icon: EventsListTab.iosIcon),
           BottomNavigationBarItem(
               label: SettingsTab.title, icon: SettingsTab.iosIcon),
@@ -188,21 +203,26 @@ class _MyHomePageState extends State<MyHomePage> {
           case 0:
             return CupertinoTabView(
               defaultTitle: HomeTab.title,
-              builder: (context) => HomeTab(),
+              builder: (context) => HomeTab(
+                selectedDate: DateTime.now(),
+              ),
             );
           case 1:
+            return CupertinoTabView(
+                defaultTitle: MonthTab.title, builder: (context) => MonthTab());
+          case 2:
             return CupertinoTabView(
               defaultTitle: EventsListTab.title,
               builder: (context) => EventsListTab(),
             );
-          case 2:
+          case 3:
             return CupertinoTabView(
               defaultTitle: SettingsTab.title,
               builder: (context) => SettingsTab(),
             );
           default:
             assert(false, 'Unexpected tab');
-            return null;
+            return CupertinoTabView();
         }
       },
     );
@@ -217,4 +237,4 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-enum Tabname { Home, Events, Settings }
+enum Tabname { Home, Month, Events, Settings }

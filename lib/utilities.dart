@@ -74,7 +74,13 @@ extension MyDuration on Duration {
   }
 }
 
-extension MyDateTime on DateTime {}
+extension MyDateTime on DateTime {
+  bool isSameDate(DateTime otherDate) {
+    return this.year == otherDate.year &&
+        this.month == otherDate.month &&
+        this.day == otherDate.day;
+  }
+}
 
 extension MyTimeOfDay on TimeOfDay {
   double toDouble() {
@@ -158,6 +164,37 @@ extension myString on String {
         return DeviceCalendarState.Initialized;
     }
   }
+
+  int toMonthInt() {
+    switch (this) {
+      case "January":
+        return 1;
+      case "February":
+        return 2;
+      case "March":
+        return 3;
+      case "April":
+        return 4;
+      case "May":
+        return 5;
+      case "June":
+        return 6;
+      case "July":
+        return 7;
+      case "August":
+        return 8;
+      case "September":
+        return 9;
+      case "October":
+        return 10;
+      case "November":
+        return 11;
+      case "December":
+        return 12;
+      default:
+        return 0;
+    }
+  }
 }
 
 extension myMaterialColor on MaterialColor {
@@ -206,26 +243,37 @@ extension myMaterialColor on MaterialColor {
   }
 }
 
-bool useWhiteForeground(Color color, {double bias: 1.0}) {
-  // Old:
-  // return 1.05 / (color.computeLuminance() + 0.05) > 4.5;
+extension myList<T> on List<T> {
+  List<List<T>> chunk(int batchSize) {
+    var len = this.length;
+    var chunks = List<List<T>>.empty(growable: true);
 
-  // New:
-  bias ??= 1.0;
-  int v = sqrt(pow(color.red, 2) * 0.299 +
-          pow(color.green, 2) * 0.587 +
-          pow(color.blue, 2) * 0.114)
+    for (var i = 0; i < len; i += batchSize) {
+      var end = (i + batchSize < len) ? i + batchSize : len;
+      chunks.add(this.sublist(i, end));
+    }
+    return chunks;
+  }
+}
+
+bool useWhiteForeground(Color color, {double bias = 1.0}) {
+  int v = sqrt(pow(color.r, 2) * 0.299 +
+          pow(color.g, 2) * 0.587 +
+          pow(color.b, 2) * 0.114)
       .round();
   return v < 130 * bias ? true : false;
 }
 
 T calendarPicker<T>(String calendarName, T shahanshahiProperty, T kadmiProperty,
     T fasliProperty) {
+  assert(calendarName == DBProvider.calendar_key_shahenshai ||
+      calendarName == DBProvider.calendar_key_kadmi ||
+      calendarName == DBProvider.calendar_key_fasli);
   return (calendarName == DBProvider.calendar_key_shahenshai)
       ? shahanshahiProperty
       : (calendarName == DBProvider.calendar_key_kadmi)
           ? kadmiProperty
           : (calendarName == DBProvider.calendar_key_fasli)
               ? fasliProperty
-              : null;
+              : throw Error();
 }

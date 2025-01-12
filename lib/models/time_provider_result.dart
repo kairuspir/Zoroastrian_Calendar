@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 class TimeProviderResult {
   final DateTime dateTime;
   final Geh geh;
@@ -7,10 +5,10 @@ class TimeProviderResult {
   final int chogNumber;
 
   const TimeProviderResult({
-    @required this.dateTime,
-    @required this.geh,
-    @required this.dayPhase,
-    @required this.chogNumber,
+    required this.dateTime,
+    required this.geh,
+    required this.dayPhase,
+    required this.chogNumber,
   });
 }
 

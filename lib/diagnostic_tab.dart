@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'database.dart';
 import 'widgets.dart';
 
@@ -11,7 +10,7 @@ class DiagnosticTab extends StatefulWidget {
 }
 
 class _DiagnosticTabState extends State<DiagnosticTab> {
-  final data = List<_DiagnosticTable>();
+  final data = List<_DiagnosticTable>.empty(growable: true);
   var isLoading = true;
 
   int get itemCount => isLoading ? data.length + 1 : data.length;
@@ -37,7 +36,7 @@ class _DiagnosticTabState extends State<DiagnosticTab> {
           tableSchemaQuery.map((e) => e["name"].toString()).toList();
 
       final tableDataQuery = await database.query(tableName);
-      final tableData = List<List<String>>();
+      final tableData = List<List<String>>.empty(growable: true);
       tableData.add(columnNamesForTable);
       tableDataQuery
           .map((e) =>
@@ -151,5 +150,8 @@ class _DiagnosticTable {
   final List<List<String>> tableData;
   bool showData;
 
-  _DiagnosticTable({this.tableName, this.tableData, this.showData});
+  _DiagnosticTable(
+      {required this.tableName,
+      required this.tableData,
+      required this.showData});
 }

@@ -43,16 +43,16 @@ class DBProvider {
     "Avardad-sal-Gah"
   ];
 
-  Database _database;
-  List<CalendarType> _calendarTypes;
-  List<int> _fasliLeapYears;
-  List<String> _mahCollection;
+  Database? _database;
+  List<CalendarType>? _calendarTypes;
+  List<int>? _fasliLeapYears;
+  List<String>? _mahCollection;
 
   Future<Database> get database async {
-    if (_database != null) return _database;
+    if (_database != null) return _database!;
     // if _database is null we instantiate it
     _database = await _initializeDB();
-    return _database;
+    return _database!;
   }
 
   _initializeDB() async {
@@ -75,38 +75,38 @@ class DBProvider {
   }
 
   Future<List<CalendarType>> get calendarTypes async {
-    if (_calendarTypes != null) return _calendarTypes;
+    if (_calendarTypes != null) return _calendarTypes!;
     final db = await database;
     final res = await db.query("CalendarType");
     final result = res.isNotEmpty
         ? res.map((e) => CalendarType.fromMap(e)).toList()
         : <CalendarType>[];
     _calendarTypes = result;
-    return _calendarTypes;
+    return _calendarTypes!;
   }
 
   Future<List<int>> get fasliLeapYears async {
-    if (_fasliLeapYears != null) return _fasliLeapYears;
+    if (_fasliLeapYears != null) return _fasliLeapYears!;
     final db = await database;
     final result = (await db.rawQuery(
             "SELECT FasliYear FROM CalendarMasterLookup where faslidayid = 366"))
-        .map<int>((x) => x["FasliYear"])
+        .map<int>((x) => x["FasliYear"] as int)
         .toList();
     _fasliLeapYears = result;
-    return _fasliLeapYears;
+    return _fasliLeapYears!;
   }
 
   Future<List<String>> get mahCollection async {
-    if (_mahCollection != null) return _mahCollection;
+    if (_mahCollection != null) return _mahCollection!;
     final db = await database;
     final result = (await db.rawQuery('''
       Select a.mahname
       FROM( SELECT Max(id), mahname 
       FROM CalendarDayLookup 
       GROUP BY mahname
-      order BY 1) as a''')).map<String>((x) => x["mahname"]).toList();
+      order BY 1) as a''')).map<String>((x) => x["mahname"] as String).toList();
     _mahCollection = result;
-    return _mahCollection;
+    return _mahCollection!;
   }
 
   Future<List<CalendarEvent>> _getEventsForDay(
@@ -186,15 +186,7 @@ class DBProvider {
 
   Future<ZorastrianDate> getZorastrianDate(DateTime now) async {
     final db = await database;
-    DateTime inputDate;
-    if (now.hour < 6) {
-      // Zorastrian day starts at 6 am.
-      inputDate = DateTime(now.year, now.month, now.day - 1, now.hour,
-          now.minute, now.second, now.millisecond, now.microsecond);
-    } else {
-      inputDate = now;
-    }
-    final today = inputDate.toString().substring(0, 10) + " 00:00:00.000";
+    final today = now.toString().substring(0, 10) + " 00:00:00.000";
     String query = '''
       SELECT CML.id,
       CML.GregorianDate,
@@ -258,7 +250,7 @@ class DBProvider {
       WHERE chaugnumber = ? AND dayphase=? AND day = ?
     ''';
     final queryResult = await db.rawQuery(query, [chogNumber, dayPhase, day]);
-    final result = queryResult.first["ChaughadiaName"];
+    final result = queryResult.first["ChaughadiaName"] as String;
     return result;
   }
 
@@ -275,13 +267,21 @@ class DBProvider {
       ''';
     final queryResult = await db.rawQuery(query);
     final result = queryResult.isEmpty
-        ? []
+        ? List<EventListTabViewModel>.empty()
         : queryResult.map((x) => EventListTabViewModel.fromMap(x)).toList();
     return result;
   }
 
   Future<HomeTabViewModel> getHomeTabData(DateTime now) async {
-    final zdt = await getZorastrianDate(now);
+    DateTime inputDate;
+    if (now.hour < 6) {
+      // Zorastrian day starts at 6 am.
+      inputDate = DateTime(now.year, now.month, now.day - 1, now.hour,
+          now.minute, now.second, now.millisecond, now.microsecond);
+    } else {
+      inputDate = now;
+    }
+    final zdt = await getZorastrianDate(inputDate);
     final timeProvider = await TimeProvider.getResult(now);
     final sg = _getGeh(timeProvider, zdt.shahanshahiDayId);
     final kg = _getGeh(timeProvider, zdt.kadmiDayId);
@@ -318,7 +318,6 @@ class DBProvider {
         themeStr = "dark";
         break;
       case ThemeMode.system:
-      default:
         themeStr = "system";
         break;
     }
@@ -335,7 +334,7 @@ class DBProvider {
     if (input.id == 0) {
       final queryResult =
           await db.rawQuery("SELECT MAX(id)+1 as id FROM CalendarEvent");
-      final int id = queryResult.first["id"];
+      final id = queryResult.first["id"] as int;
       await db.insert("CalendarEvent", input.copyWith(id: id).toMap());
     } else {
       await db.update("CalendarEvent", input.toMap(),
@@ -398,7 +397,9 @@ class DBProvider {
     final rc = (await db.rawQuery('''
       SELECT rojname FROM CalendarDayLookup 
       where id <=? and mahname = ?
-    ''', [daysInYear, mahName])).map<String>((x) => x["RojName"]).toList();
+    ''', [daysInYear, mahName]))
+        .map<String>((x) => x["RojName"] as String)
+        .toList();
     return rc;
   }
 
@@ -446,6 +447,97 @@ class DBProvider {
         .where((x) => x.name == _key_device_calendar_id)
         .single
         .value;
+    return result;
+  }
+
+  Future<List<MapEntry<ZorastrianDate, List<CalendarEvent>>>> getMonthTabData(
+      DateTime selectedDate,
+      String calendarType,
+      MonthTabCalendarMode mode) async {
+    final db = await database;
+    late List<Map<String, dynamic>> queryResult;
+    if (mode == MonthTabCalendarMode.Zoroastrian) {
+      final today = selectedDate.toString().substring(0, 10) + " 00:00:00.000";
+      final shahanshahiJoinClause = '''
+      join CalendarDayLookup 'BaseCDL' on BaseCML.shahanshahidayid = BaseCDL.Id
+      join CalendarDayLookup 'RangeCDL' on RangeCDL.MahName = BaseCDL.MahName AND RangeCDL.Id != 366
+      join CalendarMasterLookup CML on CML.shahanshahidayid = RangeCDL.Id AND BaseCML.ShahanshahiYear = CML.ShahanshahiYear
+      ''';
+      final kadmiJoinClause = '''
+      join CalendarDayLookup 'BaseCDL' on BaseCML.kadmidayid = BaseCDL.Id
+      join CalendarDayLookup 'RangeCDL' on RangeCDL.MahName = BaseCDL.MahName AND RangeCDL.Id != 366
+      join CalendarMasterLookup CML on CML.kadmidayid = RangeCDL.Id AND BaseCML.KadmiYear = CML.KadmiYear
+      ''';
+      final fasliJoinClause = '''
+      join CalendarDayLookup 'BaseCDL' on BaseCML.faslidayid = BaseCDL.Id
+      join CalendarDayLookup 'RangeCDL' on RangeCDL.MahName = BaseCDL.MahName
+      join CalendarMasterLookup CML on CML.faslidayid = RangeCDL.Id AND BaseCML.FasliYear = CML.FasliYear
+      ''';
+      final joinClause = calendarPicker(calendarType, shahanshahiJoinClause,
+          kadmiJoinClause, fasliJoinClause);
+      final query = '''
+      SELECT CML.id,
+      CML.GregorianDate,
+      CML.Shahanshahidayid,
+      SCDL.RojName AS 'ShahanshahiRojName',
+      SCDL.MahName AS 'ShahanshahiMahName',
+      CML.ShahanshahiYear,
+      CML.KadmiDayId,
+      KCDL.RojName AS 'KadmiRojName',
+      KCDL.MahName AS 'KadmiMahName',
+      CML.KadmiYear,
+      CML.faslidayid,
+      FCDL.RojName AS 'FasliRojName',
+      FCDL.MahName AS 'FasliMahName',
+      CML.FasliYear
+      FROM CalendarMasterLookup 'BaseCML' 
+      $joinClause
+      join CalendarDayLookup 'SCDL' on CML.shahanshahidayid = SCDL.Id
+      join CalendarDayLookup 'KCDL' on CML.kadmidayid = KCDL.Id
+      join CalendarDayLookup 'FCDL' on CML.faslidayid = FCDL.Id
+      where BaseCML.gregoriandate = ?
+      ''';
+      queryResult = await db.rawQuery(query, [today]);
+    } else if (mode == MonthTabCalendarMode.Gregorian) {
+      final fromDate = DateTime(selectedDate.year, selectedDate.month, 1);
+      final toDate = DateTime(selectedDate.year, selectedDate.month + 1, 0);
+      String query = '''
+      SELECT CML.id,
+      CML.GregorianDate,
+      CML.Shahanshahidayid,
+      SCDL.RojName AS 'ShahanshahiRojName',
+      SCDL.MahName AS 'ShahanshahiMahName',
+      CML.ShahanshahiYear,
+      CML.KadmiDayId,
+      KCDL.RojName AS 'KadmiRojName',
+      KCDL.MahName AS 'KadmiMahName',
+      CML.KadmiYear,
+      CML.faslidayid,
+      FCDL.RojName AS 'FasliRojName',
+      FCDL.MahName AS 'FasliMahName',
+      CML.FasliYear
+      FROM CalendarMasterLookup 'CML'
+      join CalendarDayLookup 'SCDL' on CML.shahanshahidayid = SCDL.Id
+      join CalendarDayLookup 'KCDL' on CML.kadmidayid = KCDL.Id
+      join CalendarDayLookup 'FCDL' on CML.faslidayid = FCDL.Id
+      where CML.gregoriandate >= ? AND CML.gregoriandate <= ?
+      ''';
+      queryResult = await db.rawQuery(query, [fromDate, toDate]);
+    }
+    final zorastrianDateList =
+        queryResult.map((e) => ZorastrianDate.fromMap(e)).toList();
+
+    final result = List<MapEntry<ZorastrianDate, List<CalendarEvent>>>.empty(
+        growable: true);
+
+    await Future.forEach(zorastrianDateList, (e) async {
+      final eventList = await _getEventsForDay(
+          calendarType,
+          calendarPicker(
+              calendarType, e.shahanshahiDayId, e.kadmiDayId, e.fasliDayId));
+      result.add(MapEntry(e, eventList));
+    });
+
     return result;
   }
 }

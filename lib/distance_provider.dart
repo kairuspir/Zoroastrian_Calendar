@@ -10,7 +10,10 @@ class GreatCircleDistance {
   double longitude2;
 
   GreatCircleDistance.fromRadians(
-      {this.latitude1, this.longitude1, this.latitude2, this.longitude2}) {
+      {required this.latitude1,
+      required this.longitude1,
+      required this.latitude2,
+      required this.longitude2}) {
     this.latitude1 = latitude1;
     this.longitude1 = longitude1;
 
@@ -21,7 +24,10 @@ class GreatCircleDistance {
   }
 
   GreatCircleDistance.fromDegrees(
-      {this.latitude1, this.longitude1, this.latitude2, this.longitude2}) {
+      {required this.latitude1,
+      required this.longitude1,
+      required this.latitude2,
+      required this.longitude2}) {
     this.latitude1 = _radiansFromDegrees(latitude1);
     this.longitude1 = _radiansFromDegrees(longitude1);
 

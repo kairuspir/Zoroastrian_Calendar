@@ -9,8 +9,8 @@ import 'widgets.dart';
 
 class EventsListTab extends StatefulWidget {
   static const title = 'Events';
-  static const androidIcon = Icon(Icons.home);
-  static const iosIcon = Icon(CupertinoIcons.home);
+  static const androidIcon = Icon(Icons.reorder);
+  static const iosIcon = Icon(CupertinoIcons.text_justify);
 
   @override
   _EventsListTabState createState() => _EventsListTabState();

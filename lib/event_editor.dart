@@ -1,7 +1,6 @@
 import 'package:app_settings/app_settings.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 
 import 'app_provider.dart';
@@ -20,7 +19,10 @@ class EventEditor extends StatefulWidget {
   final ZorastrianDate zorastrianDate;
   final CalendarEvent calendarEvent;
 
-  EventEditor({this.editorTitle, this.zorastrianDate, this.calendarEvent});
+  EventEditor(
+      {required this.editorTitle,
+      required this.zorastrianDate,
+      required this.calendarEvent});
 
   @override
   _EventEditorPageState createState() => _EventEditorPageState();
@@ -41,7 +43,7 @@ class _EventEditorPageState extends State<EventEditor> {
         return AlertDialog(
           title: Text("Select Year"),
           content: CupertinoPicker(
-            backgroundColor: Theme.of(context).backgroundColor,
+            backgroundColor: Theme.of(context).colorScheme.surface,
             looping: true,
             itemExtent: 50,
             scrollController:
@@ -56,16 +58,16 @@ class _EventEditorPageState extends State<EventEditor> {
                 .toList(),
           ),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
                 child: Text("CANCEL")),
-            FlatButton(
+            TextButton(
                 onPressed: () async {
                   if (_selectedYearIndex != _initialIndex) {
                     final numListMap = numList.asMap();
-                    final _selectedYear = numListMap[_selectedYearIndex];
+                    final _selectedYear = numListMap[_selectedYearIndex] as int;
                     await _logic.setEventEditorYear(_selectedYear);
                   }
                   Navigator.of(context).pop();
@@ -121,7 +123,7 @@ class _EventEditorPageState extends State<EventEditor> {
 
   @override
   Widget build(BuildContext context) {
-    final deviceCalendarState = AppProvider.of(context).deviceCalendarState;
+    final deviceCalendarState = AppProvider.of(context)!.deviceCalendarState;
 
     return MyFutureBuilder<EventEditorViewModel>(
       future: _logic.getEventEditorData(),
@@ -151,14 +153,14 @@ class _EventEditorPageState extends State<EventEditor> {
                         labelText: 'Enter Name', hintText: 'Name'),
                     initialValue: data.eventTitle,
                     validator: (value) {
-                      if (value.isEmpty) {
+                      if (value!.isEmpty) {
                         return 'Please enter a name';
                       } else {
                         return null;
                       }
                     },
                     onSaved: (value) {
-                      _logic.setEventEditorEventTitle(value);
+                      _logic.setEventEditorEventTitle(value!);
                       setState(() {});
                     },
                   ),
@@ -171,7 +173,7 @@ class _EventEditorPageState extends State<EventEditor> {
                             DropdownMenuItem(value: x, child: Text(x.name)))
                         .toList(),
                     onChanged: (value) {
-                      _logic.setEventEditorCalendarType(value);
+                      _logic.setEventEditorCalendarType(value!);
                       setState(() {});
                     },
                     isExpanded: true,
@@ -183,7 +185,7 @@ class _EventEditorPageState extends State<EventEditor> {
                         .map((x) => DropdownMenuItem(value: x, child: Text(x)))
                         .toList(),
                     onChanged: (value) async {
-                      await _logic.setEventEditorRoj(value);
+                      await _logic.setEventEditorRoj(value!);
                       setState(() {});
                     },
                   ),
@@ -194,7 +196,7 @@ class _EventEditorPageState extends State<EventEditor> {
                         .map((x) => DropdownMenuItem(value: x, child: Text(x)))
                         .toList(),
                     onChanged: (value) async {
-                      await _logic.setEventEditorMah(value);
+                      await _logic.setEventEditorMah(value!);
                       setState(() {});
                     },
                   ),
@@ -214,7 +216,7 @@ class _EventEditorPageState extends State<EventEditor> {
                           .format(data.selectedDate)),
                     ),
                     onTap: () async {
-                      DateTime pickedDate = await showDatePicker(
+                      DateTime? pickedDate = await showDatePicker(
                           context: context,
                           initialDate: data.selectedDate,
                           firstDate: DateTime(1900, 1, 1),
@@ -227,11 +229,11 @@ class _EventEditorPageState extends State<EventEditor> {
                       setState(() {});
                     },
                   ),
-                  RaisedButton(
+                  ElevatedButton(
                     child: Text("Save"),
                     onPressed: () async {
-                      if (_formKey.currentState.validate()) {
-                        _formKey.currentState.save();
+                      if (_formKey.currentState!.validate()) {
+                        _formKey.currentState!.save();
 
                         if (deviceCalendarState ==
                             DeviceCalendarState.Disabled) {
@@ -242,7 +244,7 @@ class _EventEditorPageState extends State<EventEditor> {
                             if (deviceCalendarState ==
                                 DeviceCalendarState.NotInitialized) {
                               await _logic.initializeDeviceCalendar();
-                              AppProvider.of(context).callSetState();
+                              AppProvider.of(context)!.callSetState();
                             }
                             await _logic.saveEventToDeviceCalendar();
                             await _logic.saveEventEditorEvent();
@@ -254,7 +256,7 @@ class _EventEditorPageState extends State<EventEditor> {
                       }
                     },
                   ),
-                  RaisedButton(
+                  ElevatedButton(
                       child: Text("Cancel"),
                       onPressed: () {
                         Navigator.pop(context);

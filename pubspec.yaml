@@ -12,10 +12,10 @@ description: Zoroastrian Calendar
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 version: 1.0.0+1
+publish_to: none # Remove this line if you wish to publish to pub.dev
 
 environment:
-  #sdk: ">=2.1.0 <3.0.0"
-  sdk: ">=2.6.0 <3.0.0"
+  sdk: ^3.6.0
 
 dependencies:
   flutter:
@@ -25,11 +25,13 @@ dependencies:
   path_provider: any
   intl: any
   equatable: any
-  sunrise_sunset: any
+  sunrise_sunset: 
+    git: https://github.com/kairuspir/sunrise-sunset
   location: any
   tuple: any
   device_calendar: any
   app_settings: any
+  material_design_icons_flutter: any
   
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -39,6 +41,12 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+  # The "flutter_lints" package below contains a set of recommended lints to
+  # encourage good coding practices. The lint set provided by the package is
+  # activated in the `analysis_options.yaml` file located at the root of your
+  # package. See that file for information about deactivating specific lint
+  # rules and activating additional ones.
+  flutter_lints: ^5.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

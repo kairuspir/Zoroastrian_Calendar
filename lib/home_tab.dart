@@ -16,15 +16,17 @@ class HomeTab extends StatefulWidget {
   static const title = 'Home';
   static const androidIcon = Icon(Icons.home);
   static const iosIcon = Icon(CupertinoIcons.home);
+  final DateTime selectedDate;
+  const HomeTab({super.key, required this.selectedDate});
 
   @override
-  _HomeTabState createState() => _HomeTabState();
+  HomeTabState createState() => HomeTabState();
 }
 
-class _HomeTabState extends State<HomeTab> with TickerProviderStateMixin {
-  DateTime _selectedDate = DateTime.now();
-  TabController _tabController;
-  CalendarType calendarType;
+class HomeTabState extends State<HomeTab> with TickerProviderStateMixin {
+  late DateTime _selectedDate;
+  late TabController _tabController;
+  CalendarType? calendarType;
 
   _setToday() {
     setState(() {
@@ -33,14 +35,14 @@ class _HomeTabState extends State<HomeTab> with TickerProviderStateMixin {
   }
 
   Future _setDate() async {
-    DateTime pickedDate = await showDatePicker(
+    DateTime? pickedDate = await showDatePicker(
         context: context,
         initialDate: _selectedDate,
         firstDate: DateTime(1900, 1, 1),
         lastDate: DateTime(2100, 12, 31));
 
     if (pickedDate != null) {
-      TimeOfDay pickedTime = await showTimePicker(
+      TimeOfDay? pickedTime = await showTimePicker(
           context: context, initialTime: TimeOfDay.fromDateTime(_selectedDate));
 
       setState(() {
@@ -103,7 +105,7 @@ class _HomeTabState extends State<HomeTab> with TickerProviderStateMixin {
               Text("Today's Events"),
             ],
           ),
-        ...?events
+        ...events
             .map((x) => Row(
                   children: <Widget>[
                     Expanded(
@@ -291,9 +293,7 @@ class _HomeTabState extends State<HomeTab> with TickerProviderStateMixin {
                         ][_tabController.index],
                       ),
                       Divider(color: Theme.of(context).dividerColor),
-                      RaisedButton(
-                        padding: const EdgeInsets.all(8.0),
-                        textTheme: Theme.of(context).buttonTheme.textTheme,
+                      ElevatedButton(
                         onPressed: () {
                           final calendarTypeId = _tabController.index + 1;
                           final calendarDayLookupId = (calendarTypeId == 1)
@@ -309,9 +309,12 @@ class _HomeTabState extends State<HomeTab> with TickerProviderStateMixin {
                                 zorastrianDate: data.zorastrianDate,
                                 calendarEvent: CalendarEvent(
                                   id: 0,
+                                  calendarMasterLookupId: 0,
                                   calendarTypeId: calendarTypeId,
                                   calendarDayLookupId: calendarDayLookupId,
+                                  title: "",
                                   description: "",
+                                  deviceCalendarEventId: "",
                                   isDeleted: 0,
                                 ),
                               ),
@@ -333,6 +336,7 @@ class _HomeTabState extends State<HomeTab> with TickerProviderStateMixin {
   void initState() {
     _tabController = new TabController(vsync: this, length: 3);
     _tabController.addListener(_handleTabSelection);
+    _selectedDate = widget.selectedDate;
     super.initState();
   }
 
@@ -344,7 +348,7 @@ class _HomeTabState extends State<HomeTab> with TickerProviderStateMixin {
 
   @override
   void didChangeDependencies() {
-    final calendarType = AppProvider.of(context).calendarType;
+    final calendarType = AppProvider.of(context)!.calendarType;
 
     if (calendarType != this.calendarType) {
       this.calendarType = calendarType;

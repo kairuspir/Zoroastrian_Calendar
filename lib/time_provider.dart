@@ -179,10 +179,10 @@ class SunriseSunsetTimeProvider {
     final cache = (await DBProvider.db.getSunriseSunsetLocationCache(dateTime))
         .map((x) => Tuple2<double, SunriseSunsetLocationCache>(
             GreatCircleDistance.fromDegrees(
-              latitude1: _locationData.latitude,
-              longitude1: _locationData.longitude,
-              latitude2: x.locationData.latitude,
-              longitude2: x.locationData.longitude,
+              latitude1: _locationData.latitude!,
+              longitude1: _locationData.longitude!,
+              latitude2: x.locationData.latitude!,
+              longitude2: x.locationData.longitude!,
             ).vincentyDistance(),
             x))
         // Dont use if distance is greater than 27 km
@@ -198,13 +198,13 @@ class SunriseSunsetTimeProvider {
           date: dateTime,
           latitude: _locationData.latitude,
           longitude: _locationData.longitude);
-      if (query.success) {
-        result = query.data;
+      if (query!.success) {
+        result = query.data!;
         await DBProvider.db
             .setSunriseSunsetLocationCache(SunriseSunsetLocationCache(
           date: dateTime,
           locationData: _locationData,
-          sunriseSunsetData: query.data,
+          sunriseSunsetData: query.data!,
         ));
       }
     }
