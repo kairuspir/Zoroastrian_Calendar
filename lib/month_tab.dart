@@ -23,7 +23,7 @@ class MonthTab extends StatefulWidget {
 
 class _MonthTabState extends State<MonthTab> {
   final _logic = MonthTabLogic();
-  late AppProvider appProvider;
+  AppProvider? appProvider;
   late Future<MonthTabViewModel> viewmodel;
   @override
   void initState() {

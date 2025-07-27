@@ -54,13 +54,15 @@ class DeviceCalendarProvider {
   }
 
   static Future<bool> isEventPresentInCalendar(
-      String calendarId, String eventId) async {
+      String calendarId, String? eventId) async {
     var result = false;
-    RetrieveEventsParams retrieveEventsParams =
-        RetrieveEventsParams(eventIds: [eventId]);
-    final eventsResult = await _deviceCalendarPlugin.retrieveEvents(
-        calendarId, retrieveEventsParams);
-    result = eventsResult.data!.isNotEmpty;
+    if (eventId != null) {
+      RetrieveEventsParams retrieveEventsParams =
+          RetrieveEventsParams(eventIds: [eventId]);
+      final eventsResult = await _deviceCalendarPlugin.retrieveEvents(
+          calendarId, retrieveEventsParams);
+      result = eventsResult.data!.isNotEmpty;
+    }
     return result;
   }
 }
