@@ -11,22 +11,22 @@ String calendarEventToJson(CalendarEvent data) => json.encode(data.toMap());
 
 class CalendarEvent {
   final int id;
-  final int calendarMasterLookupId;
+  final int? calendarMasterLookupId;
   final int calendarDayLookupId;
   final int calendarTypeId;
   final String title;
   final String description;
-  final String deviceCalendarEventId;
+  final String? deviceCalendarEventId;
   final int isDeleted;
 
   const CalendarEvent({
     required this.id,
-    required this.calendarMasterLookupId,
+    this.calendarMasterLookupId,
     required this.calendarDayLookupId,
     required this.calendarTypeId,
     required this.title,
     required this.description,
-    required this.deviceCalendarEventId,
+    this.deviceCalendarEventId,
     required this.isDeleted,
   });
 
