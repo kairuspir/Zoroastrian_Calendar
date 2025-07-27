@@ -15,10 +15,10 @@ void main() => runApp(MyApp());
 
 class MyApp extends StatefulWidget {
   // This widget is the root of your application.
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
-  _MyAppPageState createState() => _MyAppPageState();
+  State<MyApp> createState() => _MyAppPageState();
 }
 
 class _MyAppPageState extends State<MyApp> {
@@ -28,11 +28,11 @@ class _MyAppPageState extends State<MyApp> {
 
   Future onSelectNotification(String? payload) async {
     if (payload != null) {
-      debugPrint('notification payload: ' + payload);
+      debugPrint('notification payload: $payload');
     }
     await Navigator.push(
       context,
-      new MaterialPageRoute(
+      MaterialPageRoute(
           builder: (context) => MyHomePage(title: 'Zorastrian Calendar')),
     );
   }
@@ -46,7 +46,6 @@ class _MyAppPageState extends State<MyApp> {
             themeColor: data.themeColor,
             themeMode: data.themeMode,
             calendarType: data.calendarType,
-            deviceCalendarState: data.deviceCalendarState,
             callSetState: callSetState,
             child: MaterialApp(
               title: 'Flutter Demo',
@@ -70,7 +69,7 @@ class _MyAppPageState extends State<MyApp> {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, required this.title}) : super(key: key);
+  const MyHomePage({super.key, required this.title});
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -84,7 +83,7 @@ class MyHomePage extends StatefulWidget {
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
@@ -100,19 +99,19 @@ class _MyHomePageState extends State<MyHomePage> {
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
       switch (tabname) {
-        case Tabname.Month:
+        case Tabname.month:
           _activeTabTitle = MonthTab.title;
           _activeTabWidget = MonthTab();
           break;
-        case Tabname.Events:
+        case Tabname.events:
           _activeTabTitle = EventsListTab.title;
           _activeTabWidget = EventsListTab();
           break;
-        case Tabname.Settings:
+        case Tabname.settings:
           _activeTabTitle = SettingsTab.title;
           _activeTabWidget = SettingsTab();
           break;
-        case Tabname.Home:
+        case Tabname.home:
           _activeTabTitle = HomeTab.title;
           _activeTabWidget = HomeTab(
             selectedDate: DateTime.now(),
@@ -145,7 +144,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 title: Text(HomeTab.title),
                 onTap: () {
                   Navigator.pop(context);
-                  _setTab(Tabname.Home);
+                  _setTab(Tabname.home);
                 },
               ),
               ListTile(
@@ -153,7 +152,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 title: Text(MonthTab.title),
                 onTap: () {
                   Navigator.pop(context);
-                  _setTab(Tabname.Month);
+                  _setTab(Tabname.month);
                 },
               ),
               ListTile(
@@ -161,7 +160,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 title: Text(EventsListTab.title),
                 onTap: () {
                   Navigator.pop(context);
-                  _setTab(Tabname.Events);
+                  _setTab(Tabname.events);
                 },
               ),
               // Long drawer contents are often segmented.
@@ -174,7 +173,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 title: Text(SettingsTab.title),
                 onTap: () {
                   Navigator.pop(context);
-                  _setTab(Tabname.Settings);
+                  _setTab(Tabname.settings);
                 },
               )
             ],
@@ -237,4 +236,4 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-enum Tabname { Home, Month, Events, Settings }
+enum Tabname { home, month, events, settings }

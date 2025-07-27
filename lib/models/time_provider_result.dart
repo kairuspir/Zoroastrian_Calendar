@@ -12,4 +12,4 @@ class TimeProviderResult {
   });
 }
 
-enum Geh { Ushahin, Havan, Rapithwan, Uzirin, Aevishuthrem }
+enum Geh { ushahin, havan, rapithwan, uzirin, aevishuthrem }

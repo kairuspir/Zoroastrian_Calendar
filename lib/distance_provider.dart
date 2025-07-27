@@ -14,11 +14,11 @@ class GreatCircleDistance {
       required this.longitude1,
       required this.latitude2,
       required this.longitude2}) {
-    this.latitude1 = latitude1;
-    this.longitude1 = longitude1;
+    latitude1 = latitude1;
+    longitude1 = longitude1;
 
-    this.latitude2 = latitude2;
-    this.longitude2 = longitude2;
+    latitude2 = latitude2;
+    longitude2 = longitude2;
 
     _throwExceptionOnInvalidCoordinates();
   }
@@ -28,11 +28,11 @@ class GreatCircleDistance {
       required this.longitude1,
       required this.latitude2,
       required this.longitude2}) {
-    this.latitude1 = _radiansFromDegrees(latitude1);
-    this.longitude1 = _radiansFromDegrees(longitude1);
+    latitude1 = _radiansFromDegrees(latitude1);
+    longitude1 = _radiansFromDegrees(longitude1);
 
-    this.latitude2 = _radiansFromDegrees(latitude2);
-    this.longitude2 = _radiansFromDegrees(longitude2);
+    latitude2 = _radiansFromDegrees(latitude2);
+    longitude2 = _radiansFromDegrees(longitude2);
 
     _throwExceptionOnInvalidCoordinates();
   }
@@ -41,15 +41,14 @@ class GreatCircleDistance {
   /// The haversine formula determines the great-circle distance between two points on a sphere given their longitudes and latitudes
   /// See [Haversine formula](https://en.wikipedia.org/wiki/Haversine_formula)
   double haversineDistance() {
-    return Haversine.distance(
-        this.latitude1, this.longitude1, this.latitude2, this.longitude2);
+    return Haversine.distance(latitude1, longitude1, latitude2, longitude2);
   }
 
   /// Calculate distance using Spherical law of cosines
   /// See [Spherical law of cosines](https://en.wikipedia.org/wiki/Spherical_law_of_cosines)
   double sphericalLawOfCosinesDistance() {
     return SphericalLawOfCosines.distance(
-        this.latitude1, this.longitude1, this.latitude2, this.longitude2);
+        latitude1, longitude1, latitude2, longitude2);
   }
 
   /// Calculate distance using Vincenty formula
@@ -57,8 +56,7 @@ class GreatCircleDistance {
   /// They are based on the assumption that the figure of the Earth is an oblate spheroid, and hence are more accurate than methods that assume a spherical Earth, such as great-circle distance
   /// See [Vincenty's formulae](https://en.wikipedia.org/wiki/Vincenty%27s_formulae)
   double vincentyDistance() {
-    return Vincenty.distance(
-        this.latitude1, this.longitude1, this.latitude2, this.longitude2);
+    return Vincenty.distance(latitude1, longitude1, latitude2, longitude2);
   }
 
   double _radiansFromDegrees(final double degrees) => degrees * (pi / 180.0);
@@ -89,21 +87,23 @@ class GreatCircleDistance {
             see https://en.wikipedia.org/wiki/Decimal_degrees
         """;
 
-    if (!_isValidCoordinate(this.latitude1, this.longitude1))
-      throw new FormatException(
+    if (!_isValidCoordinate(latitude1, longitude1)) {
+      throw FormatException(
           "Invalid coordinates at latitude1|longitude1\n$invalidDescription");
+    }
 
-    if (!_isValidCoordinate(this.latitude2, this.longitude2))
-      throw new FormatException(
+    if (!_isValidCoordinate(latitude2, longitude2)) {
+      throw FormatException(
           "Invalid coordinates at latitude2|longitude2\n$invalidDescription");
+    }
   }
 }
 
 class Haversine {
   static double distance(double lat1, lon1, lat2, lon2) {
-    const EarthRadius = 6378137.0; // WGS84 major axis
+    const earthRadius = 6378137.0; // WGS84 major axis
     double distance = 2 *
-        EarthRadius *
+        earthRadius *
         asin(sqrt(pow(sin(lat2 - lat1) / 2, 2) +
             cos(lat1) * cos(lat2) * pow(sin(lon2 - lon1) / 2, 2)));
     return distance;
@@ -116,8 +116,8 @@ class SphericalLawOfCosines {
         acos(sin(lat1) * sin(lat2) + cos(lat1) * cos(lat2) * cos(lon2 - lon1));
     if (distance < 0) distance = distance + pi;
 
-    const EarthRadius = 6378137.0; // WGS84 major axis
-    return EarthRadius * distance;
+    const earthRadius = 6378137.0; // WGS84 major axis
+    return earthRadius * distance;
   }
 }
 
@@ -128,7 +128,7 @@ class Vincenty {
 
     // Based on http://www.ngs.noaa.gov/PUBS_LIB/inverse.pdf
     // using the "Inverse Formula" (section 4)
-    const MAXITERS = 20;
+    const maxIterations = 20;
 
     double a = 6378137.0; // WGS84 major axis
     double b = 6356752.3142; // WGS84 semi-major axis
@@ -153,7 +153,7 @@ class Vincenty {
     double cosLambda = 0.0;
     double sinLambda = 0.0;
     double lambda = L; // initial guess
-    for (int iter = 0; iter < MAXITERS; iter++) {
+    for (int iter = 0; iter < maxIterations; iter++) {
       double lambdaOrig = lambda;
       cosLambda = cos(lambda);
       sinLambda = sin(lambda);

@@ -18,11 +18,11 @@ class MonthTabLogic {
   }
 
   Future<void> setNextMonth() async {
-    final yc = (model.mode == MonthTabCalendarMode.Zoroastrian)
+    final yc = (model.mode == MonthTabCalendarMode.zoroastrian)
         ? salCollection
         : yearCollection;
     switch (model.mode) {
-      case MonthTabCalendarMode.Gregorian:
+      case MonthTabCalendarMode.gregorian:
         final newSelectedDate = DateTime(model.selectedDate.year,
             model.selectedDate.month + 1, model.selectedDate.day);
         if (!yc.contains(newSelectedDate.year)) {
@@ -30,7 +30,7 @@ class MonthTabLogic {
         }
         model = model.copyWith(selectedDate: newSelectedDate);
         break;
-      case MonthTabCalendarMode.Zoroastrian:
+      case MonthTabCalendarMode.zoroastrian:
         final currentZorastrianDate =
             await DBProvider.db.getZorastrianDate(model.selectedDate);
         final rojName = "Hormazd";
@@ -61,11 +61,11 @@ class MonthTabLogic {
   }
 
   Future<void> setPreviousMonth() async {
-    final yc = (model.mode == MonthTabCalendarMode.Zoroastrian)
+    final yc = (model.mode == MonthTabCalendarMode.zoroastrian)
         ? salCollection
         : yearCollection;
     switch (model.mode) {
-      case MonthTabCalendarMode.Gregorian:
+      case MonthTabCalendarMode.gregorian:
         final newSelectedDate = DateTime(model.selectedDate.year,
             model.selectedDate.month - 1, model.selectedDate.day);
         if (!yc.contains(newSelectedDate.year)) {
@@ -73,7 +73,7 @@ class MonthTabLogic {
         }
         model = model.copyWith(selectedDate: newSelectedDate);
         break;
-      case MonthTabCalendarMode.Zoroastrian:
+      case MonthTabCalendarMode.zoroastrian:
         final currentZorastrianDate =
             await DBProvider.db.getZorastrianDate(model.selectedDate);
         final rojName = "Hormazd";
@@ -108,13 +108,13 @@ class MonthTabLogic {
 
   Future<void> setMonth(String month) async {
     switch (model.mode) {
-      case MonthTabCalendarMode.Gregorian:
+      case MonthTabCalendarMode.gregorian:
         final newMonth = month.toMonthInt();
         final newSelectedDate =
             DateTime(model.selectedDate.year, newMonth, model.selectedDate.day);
         model = model.copyWith(selectedDate: newSelectedDate);
         break;
-      case MonthTabCalendarMode.Zoroastrian:
+      case MonthTabCalendarMode.zoroastrian:
         final currentZorastrianDate =
             await DBProvider.db.getZorastrianDate(model.selectedDate);
         final rojName = "Hormazd";
@@ -136,11 +136,11 @@ class MonthTabLogic {
   }
 
   Future<void> setNextYear() async {
-    final yc = (model.mode == MonthTabCalendarMode.Zoroastrian)
+    final yc = (model.mode == MonthTabCalendarMode.zoroastrian)
         ? salCollection
         : yearCollection;
     switch (model.mode) {
-      case MonthTabCalendarMode.Gregorian:
+      case MonthTabCalendarMode.gregorian:
         if (!yc.contains(model.selectedDate.year + 1)) {
           break;
         }
@@ -148,7 +148,7 @@ class MonthTabLogic {
             model.selectedDate.month, model.selectedDate.day);
         model = model.copyWith(selectedDate: newSelectedDate);
         break;
-      case MonthTabCalendarMode.Zoroastrian:
+      case MonthTabCalendarMode.zoroastrian:
         final currentZorastrianDate =
             await DBProvider.db.getZorastrianDate(model.selectedDate);
         var rojName = currentZorastrianDate.getRojName(model.calendarType);
@@ -173,11 +173,11 @@ class MonthTabLogic {
   }
 
   Future<void> setPreviousYear() async {
-    final yc = (model.mode == MonthTabCalendarMode.Zoroastrian)
+    final yc = (model.mode == MonthTabCalendarMode.zoroastrian)
         ? salCollection
         : yearCollection;
     switch (model.mode) {
-      case MonthTabCalendarMode.Gregorian:
+      case MonthTabCalendarMode.gregorian:
         if (!yc.contains(model.selectedDate.year - 1)) {
           break;
         }
@@ -185,7 +185,7 @@ class MonthTabLogic {
             model.selectedDate.month, model.selectedDate.day);
         model = model.copyWith(selectedDate: newSelectedDate);
         break;
-      case MonthTabCalendarMode.Zoroastrian:
+      case MonthTabCalendarMode.zoroastrian:
         final currentZorastrianDate =
             await DBProvider.db.getZorastrianDate(model.selectedDate);
         var rojName = currentZorastrianDate.getRojName(model.calendarType);
@@ -211,11 +211,11 @@ class MonthTabLogic {
   }
 
   Future<void> setYear(int year) async {
-    final yc = (model.mode == MonthTabCalendarMode.Zoroastrian)
+    final yc = (model.mode == MonthTabCalendarMode.zoroastrian)
         ? salCollection
         : yearCollection;
     switch (model.mode) {
-      case MonthTabCalendarMode.Gregorian:
+      case MonthTabCalendarMode.gregorian:
         if (!yc.contains(year)) {
           break;
         }
@@ -223,7 +223,7 @@ class MonthTabLogic {
             DateTime(year, model.selectedDate.month, model.selectedDate.day);
         model = model.copyWith(selectedDate: newSelectedDate);
         break;
-      case MonthTabCalendarMode.Zoroastrian:
+      case MonthTabCalendarMode.zoroastrian:
         final currentZorastrianDate =
             await DBProvider.db.getZorastrianDate(model.selectedDate);
         var rojName = currentZorastrianDate.getRojName(model.calendarType);
@@ -252,24 +252,24 @@ class MonthTabLogic {
     final tableData = List<List<DayInMonthTabViewModel>>.empty(growable: true);
     tableData.add(_getTableHeader());
     tableData.addAll(_getTableBody(rawList));
-    final mc = (model.mode == MonthTabCalendarMode.Zoroastrian)
+    final mc = (model.mode == MonthTabCalendarMode.zoroastrian)
         ? await DBProvider.db.mahCollection
         : Month.values.map((e) => e.name).toList();
-    final yc = (model.mode == MonthTabCalendarMode.Zoroastrian)
+    final yc = (model.mode == MonthTabCalendarMode.zoroastrian)
         ? salCollection
         : yearCollection;
-    final pcm = (model.mode == MonthTabCalendarMode.Zoroastrian)
+    final pcm = (model.mode == MonthTabCalendarMode.zoroastrian)
         ? calendarPicker(
             model.calendarType,
             rawList.first.key.shahanshahiMahName,
             rawList.first.key.kadmiMahName,
             rawList.first.key.fasliMahName)
         : DateFormat(DateFormat.MONTH).format(rawList.first.key.gregorianDate);
-    final pcy = (model.mode == MonthTabCalendarMode.Zoroastrian)
+    final pcy = (model.mode == MonthTabCalendarMode.zoroastrian)
         ? calendarPicker(model.calendarType, rawList.first.key.shahanshahiYear,
             rawList.first.key.kadmiYear, rawList.first.key.fasliYear)
         : rawList.first.key.gregorianDate.year;
-    final scfm = (model.mode == MonthTabCalendarMode.Zoroastrian)
+    final scfm = (model.mode == MonthTabCalendarMode.zoroastrian)
         ? DateFormat(DateFormat.ABBR_MONTH)
             .format(rawList.first.key.gregorianDate)
         : calendarPicker(
@@ -277,11 +277,11 @@ class MonthTabLogic {
             rawList.first.key.shahanshahiMahName,
             rawList.first.key.kadmiMahName,
             rawList.first.key.fasliMahName);
-    final scfy = (model.mode == MonthTabCalendarMode.Zoroastrian)
+    final scfy = (model.mode == MonthTabCalendarMode.zoroastrian)
         ? rawList.first.key.gregorianDate.year
         : calendarPicker(model.calendarType, rawList.first.key.shahanshahiYear,
             rawList.first.key.kadmiYear, rawList.first.key.fasliYear);
-    final sctm = (model.mode == MonthTabCalendarMode.Zoroastrian)
+    final sctm = (model.mode == MonthTabCalendarMode.zoroastrian)
         ? DateFormat(DateFormat.ABBR_MONTH)
             .format(rawList.last.key.gregorianDate)
         : calendarPicker(
@@ -289,7 +289,7 @@ class MonthTabLogic {
             rawList.last.key.shahanshahiMahName,
             rawList.last.key.kadmiMahName,
             rawList.last.key.fasliMahName);
-    final scty = (model.mode == MonthTabCalendarMode.Zoroastrian)
+    final scty = (model.mode == MonthTabCalendarMode.zoroastrian)
         ? rawList.last.key.gregorianDate.year
         : calendarPicker(model.calendarType, rawList.last.key.shahanshahiYear,
             rawList.last.key.kadmiYear, rawList.last.key.fasliYear);
@@ -328,7 +328,7 @@ class MonthTabLogic {
   List<List<DayInMonthTabViewModel>> _getTableBody(
       List<MapEntry<ZorastrianDate, List<CalendarEvent>>> rawList) {
     final dateTime = DateTime.now();
-    final calendarName = DBProvider.calendar_key_shahenshai;
+    final calendarName = DBProvider.calendarKeyShahenshai;
     final todaysDate = DateTime(dateTime.year, dateTime.month, dateTime.day);
     final paddedRaw = List<DayInMonthTabViewModel>.empty(growable: true);
     paddedRaw.addAll(_getPrefixedEmptyCells(rawList.first.key.gregorianDate));

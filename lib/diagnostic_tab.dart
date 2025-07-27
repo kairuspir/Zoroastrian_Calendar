@@ -5,8 +5,10 @@ import 'widgets.dart';
 
 class DiagnosticTab extends StatefulWidget {
   static const title = "Diagnostics";
+
+  const DiagnosticTab({super.key});
   @override
-  _DiagnosticTabState createState() => _DiagnosticTabState();
+  State<DiagnosticTab> createState() => _DiagnosticTabState();
 }
 
 class _DiagnosticTabState extends State<DiagnosticTab> {
@@ -31,7 +33,7 @@ class _DiagnosticTabState extends State<DiagnosticTab> {
 
     for (var tableName in tableNames) {
       final tableSchemaQuery =
-          await database.rawQuery("PRAGMA table_info(" + tableName + ")");
+          await database.rawQuery("PRAGMA table_info($tableName)");
       final columnNamesForTable =
           tableSchemaQuery.map((e) => e["name"].toString()).toList();
 
@@ -46,7 +48,7 @@ class _DiagnosticTabState extends State<DiagnosticTab> {
 
       final table = _DiagnosticTable(
           tableName: tableName, tableData: tableData, showData: false);
-      if (this.mounted) {
+      if (mounted) {
         setState(() {
           data.add(table);
         });
@@ -54,7 +56,7 @@ class _DiagnosticTabState extends State<DiagnosticTab> {
         return;
       }
     }
-    if (this.mounted) {
+    if (mounted) {
       setState(() {
         isLoading = false;
       });

@@ -34,7 +34,7 @@ class HomeTabState extends State<HomeTab> with TickerProviderStateMixin {
     });
   }
 
-  Future _setDate() async {
+  Future _setDate(BuildContext context) async {
     DateTime? pickedDate = await showDatePicker(
         context: context,
         initialDate: _selectedDate,
@@ -42,8 +42,11 @@ class HomeTabState extends State<HomeTab> with TickerProviderStateMixin {
         lastDate: DateTime(2100, 12, 31));
 
     if (pickedDate != null) {
-      TimeOfDay? pickedTime = await showTimePicker(
-          context: context, initialTime: TimeOfDay.fromDateTime(_selectedDate));
+      TimeOfDay? pickedTime = (context.mounted)
+          ? await showTimePicker(
+              context: context,
+              initialTime: TimeOfDay.fromDateTime(_selectedDate))
+          : null;
 
       setState(() {
         if (pickedTime != null) {
@@ -98,47 +101,45 @@ class HomeTabState extends State<HomeTab> with TickerProviderStateMixin {
             ),
           ],
         ),
-        if (events.length != 0) Divider(color: Theme.of(context).dividerColor),
-        if (events.length != 0)
+        if (events.isNotEmpty) Divider(color: Theme.of(context).dividerColor),
+        if (events.isNotEmpty)
           Row(
             children: <Widget>[
               Text("Today's Events"),
             ],
           ),
-        ...events
-            .map((x) => Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: GestureDetector(
-                        child: Text(x.title),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => EventEditor(
-                                editorTitle: EditorMode.Edit,
-                                zorastrianDate: data.zorastrianDate,
-                                calendarEvent: x,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    GestureDetector(
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Icon(Icons.delete,
-                            color: Theme.of(context).primaryColor),
-                      ),
-                      onTap: () async {
-                        await DBProvider.db.deleteEvent(x);
-                        setState(() {});
-                      },
-                    ),
-                  ],
-                ))
-            .toList(),
+        ...events.map((x) => Row(
+              children: <Widget>[
+                Expanded(
+                  child: GestureDetector(
+                    child: Text(x.title),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => EventEditor(
+                            editorTitle: EditorMode.edit,
+                            zorastrianDate: data.zorastrianDate,
+                            calendarEvent: x,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                GestureDetector(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Icon(Icons.delete,
+                        color: Theme.of(context).primaryColor),
+                  ),
+                  onTap: () async {
+                    await DBProvider.db.deleteEvent(x);
+                    setState(() {});
+                  },
+                ),
+              ],
+            )),
       ],
     );
   }
@@ -165,11 +166,13 @@ class HomeTabState extends State<HomeTab> with TickerProviderStateMixin {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
                                     Text(
-                                      '${DateFormat("dd/M/yyyy").format(data.zorastrianDate.gregorianDate)}',
+                                      DateFormat("dd/M/yyyy").format(
+                                          data.zorastrianDate.gregorianDate),
                                       textAlign: TextAlign.center,
                                     ),
                                     Text(
-                                      '${DateFormat.jms().format(data.zorastrianDate.gregorianDate)}',
+                                      DateFormat.jms().format(
+                                          data.zorastrianDate.gregorianDate),
                                       textAlign: TextAlign.center,
                                     ),
                                   ],
@@ -181,7 +184,8 @@ class HomeTabState extends State<HomeTab> with TickerProviderStateMixin {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
                                     Text(
-                                      '${DateFormat.EEEE().format(data.zorastrianDate.gregorianDate)}',
+                                      DateFormat.EEEE().format(
+                                          data.zorastrianDate.gregorianDate),
                                       textAlign: TextAlign.center,
                                     ),
                                     Text(
@@ -220,7 +224,7 @@ class HomeTabState extends State<HomeTab> with TickerProviderStateMixin {
                       ),
                     ),
                     GestureDetector(
-                      onTap: _setDate,
+                      onTap: () => _setDate(context),
                       child: Padding(
                         padding: const EdgeInsets.all(12),
                         child: Column(
@@ -258,9 +262,9 @@ class HomeTabState extends State<HomeTab> with TickerProviderStateMixin {
                           indicatorColor:
                               Theme.of(context).secondaryHeaderColor,
                           tabs: <Widget>[
-                            Tab(text: DBProvider.calendar_key_shahenshai),
-                            Tab(text: DBProvider.calendar_key_kadmi),
-                            Tab(text: DBProvider.calendar_key_fasli)
+                            Tab(text: DBProvider.calendarKeyShahenshai),
+                            Tab(text: DBProvider.calendarKeyKadmi),
+                            Tab(text: DBProvider.calendarKeyFasli)
                           ],
                         ),
                       ),
@@ -305,7 +309,7 @@ class HomeTabState extends State<HomeTab> with TickerProviderStateMixin {
                             context,
                             MaterialPageRoute(
                               builder: (context) => EventEditor(
-                                editorTitle: EditorMode.Add,
+                                editorTitle: EditorMode.add,
                                 zorastrianDate: data.zorastrianDate,
                                 calendarEvent: CalendarEvent(
                                   id: 0,
@@ -321,7 +325,7 @@ class HomeTabState extends State<HomeTab> with TickerProviderStateMixin {
                             ),
                           );
                         },
-                        child: new Text("Add Event"),
+                        child: Text("Add Event"),
                       ),
                     ],
                   ),
@@ -334,7 +338,7 @@ class HomeTabState extends State<HomeTab> with TickerProviderStateMixin {
 
   @override
   void initState() {
-    _tabController = new TabController(vsync: this, length: 3);
+    _tabController = TabController(vsync: this, length: 3);
     _tabController.addListener(_handleTabSelection);
     _selectedDate = widget.selectedDate;
     super.initState();

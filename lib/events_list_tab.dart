@@ -12,8 +12,10 @@ class EventsListTab extends StatefulWidget {
   static const androidIcon = Icon(Icons.reorder);
   static const iosIcon = Icon(CupertinoIcons.text_justify);
 
+  const EventsListTab({super.key});
+
   @override
-  _EventsListTabState createState() => _EventsListTabState();
+  State<EventsListTab> createState() => _EventsListTabState();
 }
 
 class _EventsListTabState extends State<EventsListTab> {
@@ -26,10 +28,8 @@ class _EventsListTabState extends State<EventsListTab> {
             child: ListView.builder(
                 itemCount: data.length,
                 itemBuilder: (BuildContext context, index) {
-                  return Text(data[index].title +
-                      "Next occurance: " +
-                      DateFormat("EEEE dd/M/yyyy")
-                          .format(data[index].gregorianDate));
+                  return Text(
+                      "${data[index].title}Next occurance: ${DateFormat("EEEE dd/M/yyyy").format(data[index].gregorianDate)}");
                 }),
           );
         });
