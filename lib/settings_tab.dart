@@ -14,8 +14,10 @@ class SettingsTab extends StatefulWidget {
   static const androidIcon = Icon(Icons.settings);
   static const iosIcon = Icon(CupertinoIcons.gear);
 
+  const SettingsTab({super.key});
+
   @override
-  _SettingsTabState createState() => _SettingsTabState();
+  State<SettingsTab> createState() => _SettingsTabState();
 }
 
 class _SettingsTabState extends State<SettingsTab> {
@@ -90,7 +92,7 @@ class _SettingsTabState extends State<SettingsTab> {
           return AlertDialog(
             title: Text("Select a color"),
             content: SingleChildScrollView(
-              child: Container(
+              child: SizedBox(
                 width: orientation == Orientation.portrait ? 300.0 : 300.0,
                 height: orientation == Orientation.portrait ? 360.0 : 200.0,
                 child: GridView.count(

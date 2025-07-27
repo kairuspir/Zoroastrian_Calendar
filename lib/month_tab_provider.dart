@@ -3,10 +3,8 @@ import 'package:zoroastriancalendar/models/enum_models.dart';
 
 class MonthTabProvider extends InheritedWidget {
   final MonthTabCalendarMode mode;
-  final Widget child;
 
-  MonthTabProvider({required this.mode, required this.child})
-      : super(child: child);
+  const MonthTabProvider({super.key, required this.mode, required super.child});
   @override
   bool updateShouldNotify(MonthTabProvider oldWidget) {
     return true;

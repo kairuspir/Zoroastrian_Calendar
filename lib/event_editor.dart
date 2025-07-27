@@ -1,14 +1,10 @@
-import 'package:app_settings/app_settings.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import 'app_provider.dart';
-import 'device_calendar_provider.dart';
 import 'event_editor_logic.dart';
 import 'models/calendar_event.dart';
 import 'models/calendar_type.dart';
-import 'models/enum_models.dart';
 import 'models/event_editor_model.dart';
 import 'models/event_editor_view_model.dart';
 import 'models/zorastrian_date.dart';
@@ -19,13 +15,14 @@ class EventEditor extends StatefulWidget {
   final ZorastrianDate zorastrianDate;
   final CalendarEvent calendarEvent;
 
-  EventEditor(
-      {required this.editorTitle,
+  const EventEditor(
+      {super.key,
+      required this.editorTitle,
       required this.zorastrianDate,
       required this.calendarEvent});
 
   @override
-  _EventEditorPageState createState() => _EventEditorPageState();
+  State<EventEditor> createState() => _EventEditorPageState();
 }
 
 class _EventEditorPageState extends State<EventEditor> {
@@ -38,8 +35,8 @@ class _EventEditorPageState extends State<EventEditor> {
       builder: (BuildContext context) {
         //1268-1470
         final numList = [for (var i = 1268; i <= 1470; i += 1) i];
-        final _initialIndex = numList.indexOf(data.selectedYear);
-        int _selectedYearIndex = _initialIndex;
+        final initialIndex = numList.indexOf(data.selectedYear);
+        int selectedYearIndex = initialIndex;
         return AlertDialog(
           title: Text("Select Year"),
           content: CupertinoPicker(
@@ -47,9 +44,9 @@ class _EventEditorPageState extends State<EventEditor> {
             looping: true,
             itemExtent: 50,
             scrollController:
-                FixedExtentScrollController(initialItem: _initialIndex),
+                FixedExtentScrollController(initialItem: initialIndex),
             onSelectedItemChanged: (value) {
-              _selectedYearIndex = value;
+              selectedYearIndex = value;
             },
             children: numList
                 .map((x) => Padding(
@@ -65,12 +62,14 @@ class _EventEditorPageState extends State<EventEditor> {
                 child: Text("CANCEL")),
             TextButton(
                 onPressed: () async {
-                  if (_selectedYearIndex != _initialIndex) {
+                  if (selectedYearIndex != initialIndex) {
                     final numListMap = numList.asMap();
-                    final _selectedYear = numListMap[_selectedYearIndex] as int;
-                    await _logic.setEventEditorYear(_selectedYear);
+                    final selectedYear = numListMap[selectedYearIndex] as int;
+                    await _logic.setEventEditorYear(selectedYear);
                   }
-                  Navigator.of(context).pop();
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                  }
                   setState(() {});
                 },
                 child: Text("OK")),
@@ -78,32 +77,6 @@ class _EventEditorPageState extends State<EventEditor> {
         );
       },
     );
-  }
-
-  Future showCalendarPermissionsRequiredDialog() {
-    return showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text("Calendar Permissions"),
-            content: SingleChildScrollView(
-                child: ListBody(
-              children: [
-                Text(
-                    "App does not have calendar permissions granted to save to device calendar."),
-                Text("Please grant permissions to continue."),
-              ],
-            )),
-            actions: [
-              TextButton(
-                  onPressed: () {
-                    AppSettings.openAppSettings();
-                  },
-                  child: Text("Go to settings"))
-            ],
-          );
-        });
   }
 
   @override
@@ -123,8 +96,6 @@ class _EventEditorPageState extends State<EventEditor> {
 
   @override
   Widget build(BuildContext context) {
-    final deviceCalendarState = AppProvider.of(context)!.deviceCalendarState;
-
     return MyFutureBuilder<EventEditorViewModel>(
       future: _logic.getEventEditorData(),
       builder: (context, data) {
@@ -132,12 +103,14 @@ class _EventEditorPageState extends State<EventEditor> {
           appBar: AppBar(
             title: Text(data.editorTitle),
             actions: <Widget>[
-              if (widget.editorTitle == EditorMode.Edit)
+              if (widget.editorTitle == EditorMode.edit)
                 IconButton(
                   icon: Icon(Icons.delete),
                   onPressed: () async {
                     await _logic.deleteEvent(widget.calendarEvent);
-                    Navigator.pop(context);
+                    if (context.mounted) {
+                      Navigator.pop(context);
+                    }
                   },
                 ),
             ],
@@ -146,7 +119,7 @@ class _EventEditorPageState extends State<EventEditor> {
             padding: EdgeInsets.all(16.0),
             child: Form(
               key: _formKey,
-              child: new ListView(
+              child: ListView(
                 children: <Widget>[
                   TextFormField(
                     decoration: InputDecoration(
@@ -234,25 +207,10 @@ class _EventEditorPageState extends State<EventEditor> {
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
                         _formKey.currentState!.save();
-
-                        if (deviceCalendarState ==
-                            DeviceCalendarState.Disabled) {
-                          await _logic.saveEventEditorEvent();
-                        } else {
-                          if (await DeviceCalendarProvider
-                              .isPermissionsGranted()) {
-                            if (deviceCalendarState ==
-                                DeviceCalendarState.NotInitialized) {
-                              await _logic.initializeDeviceCalendar();
-                              AppProvider.of(context)!.callSetState();
-                            }
-                            await _logic.saveEventToDeviceCalendar();
-                            await _logic.saveEventEditorEvent();
-                          } else {
-                            await showCalendarPermissionsRequiredDialog();
-                          }
+                        await _logic.saveEventEditorEvent();
+                        if (context.mounted) {
+                          Navigator.pop(context);
                         }
-                        Navigator.pop(context);
                       }
                     },
                   ),

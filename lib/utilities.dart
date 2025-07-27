@@ -7,21 +7,20 @@ import 'dart:convert';
 import 'package:sunrise_sunset/sunrise_sunset.dart';
 
 import 'database.dart';
-import 'models/enum_models.dart';
 import 'models/zorastrian_date.dart';
 
-extension myZorastrianDate on ZorastrianDate {
-  int getDayId(String calendarName) => calendarPicker(
-      calendarName, this.shahanshahiDayId, this.kadmiDayId, this.fasliDayId);
+extension MyZorastrianDate on ZorastrianDate {
+  int getDayId(String calendarName) =>
+      calendarPicker(calendarName, shahanshahiDayId, kadmiDayId, fasliDayId);
 
-  String getRojName(String calendarName) => calendarPicker(calendarName,
-      this.shahanshahiRojName, this.kadmiRojName, this.fasliRojName);
+  String getRojName(String calendarName) => calendarPicker(
+      calendarName, shahanshahiRojName, kadmiRojName, fasliRojName);
 
-  String getMahName(String calendarName) => calendarPicker(calendarName,
-      this.shahanshahiMahName, this.kadmiMahName, this.fasliMahName);
+  String getMahName(String calendarName) => calendarPicker(
+      calendarName, shahanshahiMahName, kadmiMahName, fasliMahName);
 
-  int getYear(String calendarName) => calendarPicker(
-      calendarName, this.shahanshahiYear, this.kadmiYear, this.fasliYear);
+  int getYear(String calendarName) =>
+      calendarPicker(calendarName, shahanshahiYear, kadmiYear, fasliYear);
 }
 
 SunriseSunsetData sunriseSunsetDataFromJson(String str) =>
@@ -30,20 +29,19 @@ SunriseSunsetData sunriseSunsetDataFromJson(String str) =>
 String sunriseSunsetDataToJson(SunriseSunsetData data) =>
     json.encode(data.toMap());
 
-extension mySunriseSunsetData on SunriseSunsetData {
+extension MySunriseSunsetData on SunriseSunsetData {
   Map<String, dynamic> toMap() => {
-        "sunrise": this.sunrise.toIso8601String(),
-        "sunset": this.sunset.toIso8601String(),
-        "solar_noon": this.solarNoon.toIso8601String(),
-        "civil_twilight_begin": this.civilTwilightBegin.toIso8601String(),
-        "civil_twilight_end": this.civilTwilightEnd.toIso8601String(),
-        "nautical_twilight_begin": this.nauticalTwilightBegin.toIso8601String(),
-        "nautical_twilight_end": this.nauticalTwilightEnd.toIso8601String(),
+        "sunrise": sunrise.toIso8601String(),
+        "sunset": sunset.toIso8601String(),
+        "solar_noon": solarNoon.toIso8601String(),
+        "civil_twilight_begin": civilTwilightBegin.toIso8601String(),
+        "civil_twilight_end": civilTwilightEnd.toIso8601String(),
+        "nautical_twilight_begin": nauticalTwilightBegin.toIso8601String(),
+        "nautical_twilight_end": nauticalTwilightEnd.toIso8601String(),
         "astronomical_twilight_begin":
-            this.astronomicalTwilightBegin.toIso8601String(),
-        "astronomical_twilight_end":
-            this.astronomicalTwilightEnd.toIso8601String(),
-        "day_length": this.dayLength,
+            astronomicalTwilightBegin.toIso8601String(),
+        "astronomical_twilight_end": astronomicalTwilightEnd.toIso8601String(),
+        "day_length": dayLength,
       };
 }
 
@@ -52,45 +50,45 @@ LocationData locationDataFromJson(String str) =>
 
 String locationDataToJson(LocationData data) => json.encode(data.toMap());
 
-extension myLocation on LocationData {
+extension MyLocation on LocationData {
   Map<String, dynamic> toMap() => {
-        "latitude": this.latitude,
-        "longitude": this.longitude,
-        "accuracy": this.accuracy,
-        "altitude": this.altitude,
-        "speed": this.speed,
-        "speed_accuracy": this.speedAccuracy,
-        "heading": this.heading,
-        "time": this.time,
+        "latitude": latitude,
+        "longitude": longitude,
+        "accuracy": accuracy,
+        "altitude": altitude,
+        "speed": speed,
+        "speed_accuracy": speedAccuracy,
+        "heading": heading,
+        "time": time,
       };
 }
 
 extension MyDuration on Duration {
   String toTimeZoneString() {
     var sign = (inMicroseconds < 0) ? "-" : "+";
-    var hours = this.inHours.abs().toString().padLeft(2, "0");
-    var minutes = this.inMinutes.remainder(60).abs().toString().padLeft(2, "0");
-    return sign + hours + ":" + minutes;
+    var hours = inHours.abs().toString().padLeft(2, "0");
+    var minutes = inMinutes.remainder(60).abs().toString().padLeft(2, "0");
+    return "$sign$hours:$minutes";
   }
 }
 
 extension MyDateTime on DateTime {
   bool isSameDate(DateTime otherDate) {
-    return this.year == otherDate.year &&
-        this.month == otherDate.month &&
-        this.day == otherDate.day;
+    return year == otherDate.year &&
+        month == otherDate.month &&
+        day == otherDate.day;
   }
 }
 
 extension MyTimeOfDay on TimeOfDay {
   double toDouble() {
-    return this.hour + this.minute / 60.0;
+    return hour + minute / 60.0;
   }
 }
 
-extension myDouble on double {
+extension MyDouble on double {
   TimeOfDay toTimeOfDay() {
-    final doubleAsString = this.toString();
+    final doubleAsString = toString();
     final indexOfDecimal = doubleAsString.indexOf(".");
 
     int integerPart;
@@ -109,7 +107,7 @@ extension myDouble on double {
   }
 }
 
-extension myString on String {
+extension MyString on String {
   MaterialColor toMaterialColor() {
     switch (this) {
       case "red":
@@ -154,17 +152,6 @@ extension myString on String {
     }
   }
 
-  DeviceCalendarState toDeviceCalendarState() {
-    switch (this) {
-      case "NotInitialized":
-        return DeviceCalendarState.NotInitialized;
-      case "Disabled":
-        return DeviceCalendarState.Disabled;
-      default:
-        return DeviceCalendarState.Initialized;
-    }
-  }
-
   int toMonthInt() {
     switch (this) {
       case "January":
@@ -197,7 +184,7 @@ extension myString on String {
   }
 }
 
-extension myMaterialColor on MaterialColor {
+extension MyMaterialColor on MaterialColor {
   String toMaterialColorName() {
     if (this == Colors.red) {
       return "red";
@@ -243,14 +230,14 @@ extension myMaterialColor on MaterialColor {
   }
 }
 
-extension myList<T> on List<T> {
+extension MyList<T> on List<T> {
   List<List<T>> chunk(int batchSize) {
-    var len = this.length;
+    var len = length;
     var chunks = List<List<T>>.empty(growable: true);
 
     for (var i = 0; i < len; i += batchSize) {
       var end = (i + batchSize < len) ? i + batchSize : len;
-      chunks.add(this.sublist(i, end));
+      chunks.add(sublist(i, end));
     }
     return chunks;
   }
@@ -266,14 +253,14 @@ bool useWhiteForeground(Color color, {double bias = 1.0}) {
 
 T calendarPicker<T>(String calendarName, T shahanshahiProperty, T kadmiProperty,
     T fasliProperty) {
-  assert(calendarName == DBProvider.calendar_key_shahenshai ||
-      calendarName == DBProvider.calendar_key_kadmi ||
-      calendarName == DBProvider.calendar_key_fasli);
-  return (calendarName == DBProvider.calendar_key_shahenshai)
+  assert(calendarName == DBProvider.calendarKeyShahenshai ||
+      calendarName == DBProvider.calendarKeyKadmi ||
+      calendarName == DBProvider.calendarKeyFasli);
+  return (calendarName == DBProvider.calendarKeyShahenshai)
       ? shahanshahiProperty
-      : (calendarName == DBProvider.calendar_key_kadmi)
+      : (calendarName == DBProvider.calendarKeyKadmi)
           ? kadmiProperty
-          : (calendarName == DBProvider.calendar_key_fasli)
+          : (calendarName == DBProvider.calendarKeyFasli)
               ? fasliProperty
               : throw Error();
 }

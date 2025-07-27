@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:path/path.dart';
+import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -21,20 +21,25 @@ import 'models/zorastrian_date.dart';
 import 'time_provider.dart';
 import 'utilities.dart';
 
+class DBKey {
+  const DBKey();
+  String get theme => "Theme";
+  String get themeColor => "ThemeColor";
+  String get calendarType => "PreferredCalendarType";
+  String get deviceCalendarId => "DeviceCalendarId";
+}
+
 class DBProvider {
   DBProvider._();
 
   static final DBProvider db = DBProvider._();
 
-  static const _key_theme = "Theme";
-  static const _key_theme_color = "ThemeColor";
-  static const _key_calendar_type = "PreferredCalendarType";
-  static const _key_device_calendar_id = "DeviceCalendarId";
+  static DBKey key = const DBKey();
 
-  static const calendar_key_shahenshai = "Shahanshahi";
-  static const calendar_key_kadmi = "Kadmi";
-  static const calendar_key_fasli = "Fasli";
-  static const gatha_days = [
+  static const calendarKeyShahenshai = "Shahanshahi";
+  static const calendarKeyKadmi = "Kadmi";
+  static const calendarKeyFasli = "Fasli";
+  static const gathaDays = [
     "Ahunavad",
     "Ushtavad",
     "Spentomad",
@@ -58,18 +63,18 @@ class DBProvider {
   _initializeDB() async {
     // Construct a file path to copy database to
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    String path = join(documentsDirectory.path, "asset_database.db");
+    String path = p.join(documentsDirectory.path, "asset_database.db");
 
     // Only copy if the database doesn't exist
     if (FileSystemEntity.typeSync(path) == FileSystemEntityType.notFound) {
       // Load database from asset and copy
       ByteData data =
-          await rootBundle.load(join('assets', 'calLookupDb.sqlite'));
+          await rootBundle.load(p.join('assets', 'calLookupDb.sqlite'));
       List<int> bytes =
           data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
 
       // Save copied asset to documents
-      await new File(path).writeAsBytes(bytes);
+      await File(path).writeAsBytes(bytes);
     }
     return await openDatabase(path);
   }
@@ -168,9 +173,9 @@ class DBProvider {
       join CalendarDayLookup 'KCDL' on CML.kadmidayid = KCDL.Id
       join CalendarDayLookup 'FCDL' on CML.faslidayid = FCDL.Id
       ''';
-    final whereClause = (calendarType.name == calendar_key_shahenshai)
+    final whereClause = (calendarType.name == calendarKeyShahenshai)
         ? "where SCDL.RojName = ? AND SCDL.MahName = ? AND CML.ShahanshahiYear = ?"
-        : (calendarType.name == calendar_key_kadmi)
+        : (calendarType.name == calendarKeyKadmi)
             ? "where KCDL.RojName = ? AND KCDL.MahName = ? AND CML.KadmiYear = ?"
             : "where FCDL.RojName = ? AND FCDL.MahName = ? AND CML.FasliYear = ?";
     var queryResult =
@@ -186,7 +191,7 @@ class DBProvider {
 
   Future<ZorastrianDate> getZorastrianDate(DateTime now) async {
     final db = await database;
-    final today = now.toString().substring(0, 10) + " 00:00:00.000";
+    final today = "${now.toString().substring(0, 10)} 00:00:00.000";
     String query = '''
       SELECT CML.id,
       CML.GregorianDate,
@@ -217,19 +222,19 @@ class DBProvider {
   String _getGeh(TimeProviderResult timeProviderResult, int dayId) {
     var result = "";
     switch (timeProviderResult.geh) {
-      case Geh.Ushahin:
+      case Geh.ushahin:
         result = "Ushahin";
         break;
-      case Geh.Havan:
+      case Geh.havan:
         result = "Havan";
         break;
-      case Geh.Rapithwan:
+      case Geh.rapithwan:
         result = (dayId < 211) ? "Rapithwan" : "Second Havan";
         break;
-      case Geh.Uzirin:
+      case Geh.uzirin:
         result = "Uzirin";
         break;
-      case Geh.Aevishuthrem:
+      case Geh.aevishuthrem:
         result = "Aiwisruthrem";
         break;
     }
@@ -288,9 +293,9 @@ class DBProvider {
     final fg = _getGeh(timeProvider, zdt.fasliDayId);
     final ch = await _getChog(timeProvider);
     final se =
-        await _getEventsForDay(calendar_key_shahenshai, zdt.shahanshahiDayId);
-    final ke = await _getEventsForDay(calendar_key_kadmi, zdt.kadmiDayId);
-    final fe = await _getEventsForDay(calendar_key_fasli, zdt.fasliDayId);
+        await _getEventsForDay(calendarKeyShahenshai, zdt.shahanshahiDayId);
+    final ke = await _getEventsForDay(calendarKeyKadmi, zdt.kadmiDayId);
+    final fe = await _getEventsForDay(calendarKeyFasli, zdt.fasliDayId);
     return HomeTabViewModel(
       zorastrianDate: zdt,
       shahanshahiGeh: sg,
@@ -305,7 +310,7 @@ class DBProvider {
 
   Future<int> setThemeColorPreference(MaterialColor color) async {
     final colorStr = color.toMaterialColorName();
-    return await _setUserPreference(_key_theme_color, colorStr);
+    return await _setUserPreference(key.themeColor, colorStr);
   }
 
   Future<int> setTheme(ThemeMode input) async {
@@ -321,12 +326,12 @@ class DBProvider {
         themeStr = "system";
         break;
     }
-    return await _setUserPreference(_key_theme, themeStr);
+    return await _setUserPreference(key.theme, themeStr);
   }
 
   Future<int> setPreferredCalendar(CalendarType input) async {
     final inputStr = input.id.toString();
-    return await _setUserPreference(_key_calendar_type, inputStr);
+    return await _setUserPreference(key.calendarType, inputStr);
   }
 
   Future<void> saveEvent(CalendarEvent input) async {
@@ -351,13 +356,13 @@ class DBProvider {
     final preferences = await _getUserPreferences();
 
     final color = preferences
-        .where((x) => x.name == _key_theme_color)
+        .where((x) => x.name == key.themeColor)
         .single
         .value
         .toMaterialColor();
 
     final themeStr = preferences
-        .where((x) => x.name == _key_theme)
+        .where((x) => x.name == key.theme)
         .single
         .value
         .toLowerCase();
@@ -370,25 +375,17 @@ class DBProvider {
 
     final cts = await calendarTypes;
     final pct = int.parse(
-        preferences.where((x) => x.name == _key_calendar_type).single.value);
+        preferences.where((x) => x.name == key.calendarType).single.value);
     final calendarType = cts.where((x) => x.id == pct).single;
-    final deviceCalendarState = preferences
-        .where((x) => x.name == _key_device_calendar_id)
-        .single
-        .value
-        .toDeviceCalendarState();
     return MyAppViewModel(
-        themeColor: color,
-        themeMode: themeMode,
-        calendarType: calendarType,
-        deviceCalendarState: deviceCalendarState);
+        themeColor: color, themeMode: themeMode, calendarType: calendarType);
   }
 
   Future<List<String>> getRojNamesForCalendarMah(
       String mahName, String calendarName, int year) async {
     final db = await database;
     int daysInYear = 365;
-    if (calendarName == calendar_key_fasli) {
+    if (calendarName == calendarKeyFasli) {
       final fly = await fasliLeapYears;
       if (fly.contains(year)) {
         daysInYear = 366;
@@ -428,25 +425,13 @@ class DBProvider {
   }
 
   Future<int> setDeviceCalendarId(String deviceCalendarId) async {
-    return await _setUserPreference(_key_device_calendar_id, deviceCalendarId);
-  }
-
-  Future<DeviceCalendarState> getDeviceCalendarState() async {
-    final preferences = await _getUserPreferences();
-    final result = preferences
-        .where((x) => x.name == _key_device_calendar_id)
-        .single
-        .value
-        .toDeviceCalendarState();
-    return result;
+    return await _setUserPreference(key.deviceCalendarId, deviceCalendarId);
   }
 
   Future<String> getDeviceCalendarId() async {
     final preferences = await _getUserPreferences();
-    final result = preferences
-        .where((x) => x.name == _key_device_calendar_id)
-        .single
-        .value;
+    final result =
+        preferences.where((x) => x.name == key.deviceCalendarId).single.value;
     return result;
   }
 
@@ -456,8 +441,8 @@ class DBProvider {
       MonthTabCalendarMode mode) async {
     final db = await database;
     late List<Map<String, dynamic>> queryResult;
-    if (mode == MonthTabCalendarMode.Zoroastrian) {
-      final today = selectedDate.toString().substring(0, 10) + " 00:00:00.000";
+    if (mode == MonthTabCalendarMode.zoroastrian) {
+      final today = "${selectedDate.toString().substring(0, 10)} 00:00:00.000";
       final shahanshahiJoinClause = '''
       join CalendarDayLookup 'BaseCDL' on BaseCML.shahanshahidayid = BaseCDL.Id
       join CalendarDayLookup 'RangeCDL' on RangeCDL.MahName = BaseCDL.MahName AND RangeCDL.Id != 366
@@ -498,7 +483,7 @@ class DBProvider {
       where BaseCML.gregoriandate = ?
       ''';
       queryResult = await db.rawQuery(query, [today]);
-    } else if (mode == MonthTabCalendarMode.Gregorian) {
+    } else if (mode == MonthTabCalendarMode.gregorian) {
       final fromDate = DateTime(selectedDate.year, selectedDate.month, 1);
       final toDate = DateTime(selectedDate.year, selectedDate.month + 1, 0);
       String query = '''

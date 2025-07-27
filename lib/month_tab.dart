@@ -17,8 +17,10 @@ class MonthTab extends StatefulWidget {
   static final androidIcon = Icon(MdiIcons.calendarMonth);
   static const iosIcon = Icon(CupertinoIcons.calendar);
 
+  const MonthTab({super.key});
+
   @override
-  _MonthTabState createState() => _MonthTabState();
+  State<MonthTab> createState() => _MonthTabState();
 }
 
 class _MonthTabState extends State<MonthTab> {
@@ -42,7 +44,7 @@ class _MonthTabState extends State<MonthTab> {
       final calendarType = appProvider.calendarType.name;
       final now = DateTime.now();
       _logic.setModel(MonthTabModel(
-          mode: MonthTabCalendarMode.Zoroastrian,
+          mode: MonthTabCalendarMode.zoroastrian,
           selectedDate: DateTime(now.year, now.month, now.day),
           calendarType: calendarType));
       setViewModel();
@@ -207,10 +209,10 @@ class _MonthTabState extends State<MonthTab> {
 class DayCell extends StatelessWidget {
   final DayInMonthTabViewModel viewModel;
 
-  DayCell({required this.viewModel});
+  const DayCell({super.key, required this.viewModel});
   @override
   Widget build(BuildContext context) {
-    if (this.viewModel is HeaderCellInDayInMonthTabViewModel) {
+    if (viewModel is HeaderCellInDayInMonthTabViewModel) {
       return HeaderCell(
           viewModel: viewModel as HeaderCellInDayInMonthTabViewModel);
     } else {
@@ -222,13 +224,13 @@ class DayCell extends StatelessWidget {
 class HeaderCell extends StatelessWidget {
   final HeaderCellInDayInMonthTabViewModel viewModel;
 
-  HeaderCell({required this.viewModel});
+  const HeaderCell({super.key, required this.viewModel});
   @override
   Widget build(BuildContext context) {
     final nameOfDay =
         (MediaQuery.of(context).orientation == Orientation.portrait)
-            ? this.viewModel.nameOfDayShort
-            : this.viewModel.nameOfDay;
+            ? viewModel.nameOfDayShort
+            : viewModel.nameOfDay;
     return Center(child: Text(nameOfDay));
   }
 }
@@ -236,7 +238,7 @@ class HeaderCell extends StatelessWidget {
 class BodyCell extends StatelessWidget {
   final BodyCellInDayInMonthTabViewModel viewModel;
 
-  BodyCell({required this.viewModel});
+  const BodyCell({super.key, required this.viewModel});
   @override
   Widget build(BuildContext context) {
     if (viewModel is PopulatedBodyCellInDayInMonthTabViewModel) {
@@ -255,7 +257,7 @@ class BodyCell extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: (mode == MonthTabCalendarMode.Zoroastrian)
+            children: (mode == MonthTabCalendarMode.zoroastrian)
                 ? [
                     Text("${pvm.dayOfMonth} ${pvm.gregorianMonthName}",
                         textAlign: TextAlign.center),

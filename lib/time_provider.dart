@@ -12,22 +12,22 @@ import 'utilities.dart';
 
 class TimeProvider {
   static Future<TimeProviderResult> getResult(DateTime dateTime) async {
-    var _sunriseSunsetTimeProvider =
+    var sunriseSunsetTimeProvider =
         await SunriseSunsetTimeProvider.getResults(dateTime);
-    DateTime sunrise = _sunriseSunsetTimeProvider.sunrise;
-    DateTime sunset = _sunriseSunsetTimeProvider.sunset;
+    DateTime sunrise = sunriseSunsetTimeProvider.sunrise;
+    DateTime sunset = sunriseSunsetTimeProvider.sunset;
 
-    DayPhase _dayPhase;
+    DayPhase dayPhaseEnum;
     if (dateTime.isBefore(sunrise)) {
-      _dayPhase = DayPhase.BeforeSunrise;
+      dayPhaseEnum = DayPhase.beforeSunrise;
     } else if (dateTime.isBefore(sunset)) {
-      _dayPhase = DayPhase.Day;
+      dayPhaseEnum = DayPhase.day;
     } else {
-      _dayPhase = DayPhase.AfterSunset;
+      dayPhaseEnum = DayPhase.afterSunset;
     }
 
-    int chogNumber = await _getChogNumber(dateTime, _dayPhase);
-    String dayPhase = (_dayPhase == DayPhase.Day) ? "Day" : "Night";
+    int chogNumber = await _getChogNumber(dateTime, dayPhaseEnum);
+    String dayPhase = (dayPhaseEnum == DayPhase.day) ? "Day" : "Night";
 
     return TimeProviderResult(
       dateTime: dateTime,
@@ -45,15 +45,15 @@ class TimeProvider {
     final aevishuthremStart = sunset;
     Geh result;
     if (now.isBefore(havanStart)) {
-      result = Geh.Ushahin;
+      result = Geh.ushahin;
     } else if (now.isBefore(rapithwanStart)) {
-      result = Geh.Havan;
+      result = Geh.havan;
     } else if (now.isBefore(uzirenStart)) {
-      result = Geh.Rapithwan;
+      result = Geh.rapithwan;
     } else if (now.isBefore(aevishuthremStart)) {
-      result = Geh.Uzirin;
+      result = Geh.uzirin;
     } else {
-      result = Geh.Aevishuthrem;
+      result = Geh.aevishuthrem;
     }
     return result;
   }
@@ -70,19 +70,19 @@ class TimeProvider {
     DateTime phaseStart;
     DateTime phaseEnd;
     switch (dayPhase) {
-      case DayPhase.BeforeSunrise:
+      case DayPhase.beforeSunrise:
         var ssp = await SunriseSunsetTimeProvider.getResults(dateTime);
         var pssp = await SunriseSunsetTimeProvider.getResults(
             DateTime(dateTime.year, dateTime.month, dateTime.day - 1));
         phaseStart = pssp.sunset;
         phaseEnd = ssp.sunrise;
         break;
-      case DayPhase.Day:
+      case DayPhase.day:
         var ssp = await SunriseSunsetTimeProvider.getResults(dateTime);
         phaseStart = ssp.sunrise;
         phaseEnd = ssp.sunset;
         break;
-      case DayPhase.AfterSunset:
+      case DayPhase.afterSunset:
         var ssp = await SunriseSunsetTimeProvider.getResults(dateTime);
         var nssp = await SunriseSunsetTimeProvider.getResults(
             DateTime(dateTime.year, dateTime.month, dateTime.day + 1));
@@ -126,16 +126,16 @@ class TimeProvider {
   }
 }
 
-enum DayPhase { BeforeSunrise, Day, AfterSunset }
+enum DayPhase { beforeSunrise, day, afterSunset }
 
 class SunriseSunsetTimeProvider {
   static Future<SunriseSunsetData> getResults(DateTime dateTime) async {
     final offset = dateTime.timeZoneOffset.toTimeZoneString();
     final date = dateTime.toString().substring(0, 10);
-    final sunrise = date + "T06:00:00" + offset;
-    final sunset = date + "T18:00:00" + offset;
-    final noon = date + "T12:00:00" + offset;
-    final _defaultSunriseSunsetData = SunriseSunsetData.fromJSON(json.decode('''
+    final sunrise = "${date}T06:00:00$offset";
+    final sunset = "${date}T18:00:00$offset";
+    final noon = "${date}T12:00:00$offset";
+    final defaultSunriseSunsetData = SunriseSunsetData.fromJSON(json.decode('''
       {    
         "sunrise":"$sunrise",
         "sunset":"$sunset",
@@ -150,37 +150,37 @@ class SunriseSunsetTimeProvider {
       }
       '''));
 
-    var result = _defaultSunriseSunsetData;
+    var result = defaultSunriseSunsetData;
 
-    bool _serviceEnabled;
-    PermissionStatus _permissionGranted;
-    LocationData _locationData;
+    bool serviceEnabled;
+    PermissionStatus permissionGranted;
+    LocationData locationData;
 
     final location = Location();
 
-    _serviceEnabled = await location.serviceEnabled();
-    if (!_serviceEnabled) {
-      _serviceEnabled = await location.requestService();
-      if (!_serviceEnabled) {
+    serviceEnabled = await location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await location.requestService();
+      if (!serviceEnabled) {
         return result;
       }
     }
 
-    _permissionGranted = await location.hasPermission();
-    if (_permissionGranted == PermissionStatus.denied) {
-      _permissionGranted = await location.requestPermission();
-      if (_permissionGranted != PermissionStatus.granted) {
+    permissionGranted = await location.hasPermission();
+    if (permissionGranted == PermissionStatus.denied) {
+      permissionGranted = await location.requestPermission();
+      if (permissionGranted != PermissionStatus.granted) {
         return result;
       }
     }
 
-    _locationData = await location.getLocation();
+    locationData = await location.getLocation();
 
     final cache = (await DBProvider.db.getSunriseSunsetLocationCache(dateTime))
         .map((x) => Tuple2<double, SunriseSunsetLocationCache>(
             GreatCircleDistance.fromDegrees(
-              latitude1: _locationData.latitude!,
-              longitude1: _locationData.longitude!,
+              latitude1: locationData.latitude!,
+              longitude1: locationData.longitude!,
               latitude2: x.locationData.latitude!,
               longitude2: x.locationData.longitude!,
             ).vincentyDistance(),
@@ -196,14 +196,14 @@ class SunriseSunsetTimeProvider {
     } else {
       final query = await SunriseSunset.getResults(
           date: dateTime,
-          latitude: _locationData.latitude,
-          longitude: _locationData.longitude);
+          latitude: locationData.latitude,
+          longitude: locationData.longitude);
       if (query!.success) {
         result = query.data!;
         await DBProvider.db
             .setSunriseSunsetLocationCache(SunriseSunsetLocationCache(
           date: dateTime,
-          locationData: _locationData,
+          locationData: locationData,
           sunriseSunsetData: query.data!,
         ));
       }

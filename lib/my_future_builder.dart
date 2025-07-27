@@ -8,6 +8,7 @@ class MyFutureBuilder<T> extends StatelessWidget {
   final Future<T> future;
   final MySyncWidgetBuilder<T> builder;
   const MyFutureBuilder({
+    super.key,
     required this.future,
     required this.builder,
   });
@@ -18,7 +19,7 @@ class MyFutureBuilder<T> extends StatelessWidget {
         builder: (context, snapshot) {
           switch (snapshot.hasData) {
             case true:
-              return builder(context, snapshot.data!);
+              return builder(context, snapshot.data as T);
             case false:
               return Center(
                   child: CircularProgressIndicator(

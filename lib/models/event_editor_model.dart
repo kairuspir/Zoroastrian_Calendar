@@ -22,4 +22,4 @@ class EventEditorModel {
       );
 }
 
-enum EditorMode { Add, Edit }
+enum EditorMode { add, edit }
